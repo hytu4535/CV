@@ -1,0 +1,55 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Thêm khách hàng";
+    ViewData["ActivePage"] = "Customers";
+}
+
+<a asp-page="Index" class="btn btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Quay lại
+</a>
+
+<form method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" asp-for="Input.FullName" required />
+                <span class="text-danger small" asp-validation-for="Input.FullName"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" asp-for="Input.Email" required />
+                <span class="text-danger small" asp-validation-for="Input.Email"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" asp-for="Input.Phone" required />
+                <span class="text-danger small" asp-validation-for="Input.Phone"></span>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <input type="text" class="form-control" asp-for="Input.Address" />
+                <span asp-validation-for="Input.Address" class="text-danger small"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary me-2">
+            <i class="bi bi-check-lg"></i> Lưu
+        </button>
+        <a asp-page="Index" class="btn btn-outline-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

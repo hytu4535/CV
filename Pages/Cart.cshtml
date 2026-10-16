@@ -1,8 +1,9 @@
 @page
 @model CartModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Giỏ hàng";
-    var vn = new System.Globalization.CultureInfo("vi-VN");
+    var vn = new CultureInfo("vi-VN");
 }
 
 <h3 class="mb-4">Giỏ hàng của bạn</h3>
@@ -26,14 +27,14 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="@item.Product.ImageUrl" class="cart-img" alt="" />
+                                    <img src="@item.Product.ImageUrl" class="cart-img" alt="@item.Product.Name" />
                                     <a asp-page="/Products/Detail" asp-route-id="@item.Product.Id"
                                        class="text-decoration-none">@item.Product.Name</a>
                                 </div>
                             </td>
-                            <td>@item.Product.PriceText</td>
+                            <td>@(item.Product.Price.ToString("N0", vn)) ₫</td>
                             <td><input type="number" class="form-control form-control-sm qty-input" value="@item.Quantity" min="1" /></td>
-                            <td class="price">@item.TotalText</td>
+                            <td class="price">@((item.Product.Price * item.Quantity).ToString("N0", vn)) ₫</td>
                             <td><button class="btn btn-sm btn-outline-dark"><i class="bi bi-trash"></i></button></td>
                         </tr>
                     }

@@ -1,38 +1,46 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopUI.Models
 {
     public enum OrderStatus
     {
-        Pending,
-        Shipping,
-        Completed,
-        Cancelled
+        Pending = 0,
+        Shipping = 1,
+        Completed = 2,
+        Cancelled = 3
     }
 
     public class Order
     {
         public int Id { get; set; }
-        public string CustomerName { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-        public OrderStatus Status { get; set; }
-        public List<CartItem> Items { get; set; } = new List<CartItem>();
 
-        public decimal Total => Items.Sum(i => i.Total);
+        [Required]
+        public int CustomerId { get; set; }
 
-        public string StatusText => Status.ToString();
+        [ForeignKey("CustomerId")]
+        public Customer? Customer { get; set; }
 
-        public string StatusBadgeClass => Status switch
+        [Required]
+        public DateTime OrderDate { get; set; } = DateTime.Now;
+
+        [Required]
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+        [Required]
+        public decimal TotalAmount { get; set; }
+
+        public string StatusVietnamese => Status switch
         {
-            OrderStatus.Pending => "bg-warning text-dark",
-            OrderStatus.Shipping => "bg-info text-white",
-            OrderStatus.Completed => "bg-success text-white",
-            OrderStatus.Cancelled => "bg-danger text-white",
-            _ => "bg-secondary"
+            OrderStatus.Pending => "Chờ xử lý",
+            OrderStatus.Shipping => "Đang giao",
+            OrderStatus.Completed => "Hoàn thành",
+            OrderStatus.Cancelled => "Đã hủy",
+            _ => ""
         };
+
+        public ICollection<OrderDetail>? Details { get; set; } = new List<OrderDetail>();
     }
 }

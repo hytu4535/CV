@@ -12,7 +12,7 @@
 
 <form method="get" class="mb-3">
     <div class="input-group">
-        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên, email, SĐT, thành phố..." />
+        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo họ tên, email, SĐT, địa chỉ..." />
         <button class="btn btn-outline-secondary" type="submit">Tìm</button>
         <a asp-page="./Index" class="btn btn-outline-danger ms-2">Reset</a>
     </div>
@@ -40,10 +40,8 @@ else
                     <th>Họ tên</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
-                    <th>Thành phố</th>
-                    <th class="text-end">Số đơn</th>
-                    <th class="text-end">Tổng chi tiêu</th>
-                    <th class="text-end">Ngày tham gia</th>
+                    <th>Địa chỉ</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -52,16 +50,21 @@ else
                     <tr>
                         <td>
                             <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1rem;">
-                                @c.Name[0]
+                                @c.FullName[0]
                             </div>
                         </td>
-                        <td>@c.Name</td>
+                        <td>@c.FullName</td>
                         <td>@c.Email</td>
                         <td>@c.Phone</td>
-                        <td>@c.City</td>
-                        <td class="text-end">@c.OrdersCount</td>
-                        <td class="text-end">@c.TotalSpent.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
-                        <td class="text-end">@c.JoinedAt.ToString("dd/MM/yyyy")</td>
+                        <td>@c.Address</td>
+                        <td class="text-end">
+                            <form method="post" asp-page-handler="Delete">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 }
             </tbody>

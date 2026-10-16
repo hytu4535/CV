@@ -9,8 +9,9 @@
     <i class="bi bi-arrow-left"></i> Quay lại
 </a>
 
-<form method="post" enctype="multipart/form-data">
-    <div class="row g-3">
+<form method="post" enctype="multipart/form-data" novalidate>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row g-3">
         <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
@@ -21,27 +22,31 @@
         <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Danh mục <span class="text-danger">*</span></label>
-                <select class="form-select" asp-for="Input.Category" required>
+                <select class="form-select" asp-for="Input.CategoryId" asp-items="Model.CategoryList" required>
                     <option value="">-- Chọn danh mục --</option>
-                    <option value="Giày">Giày</option>
-                    <option value="Áo">Áo</option>
-                    <option value="Túi">Túi</option>
-                    <option value="Đồng hồ">Đồng hồ</option>
                 </select>
-                <span class="text-danger small" asp-validation-for="Input.Category"></span>
+                <span class="text-danger small" asp-validation-for="Input.CategoryId"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Giá (₫) <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" asp-for="Input.Price" min="0" step="any" required />
+                <input type="number" class="form-control" asp-for="Input.Price" min="1000" step="any" required />
                 <span class="text-danger small" asp-validation-for="Input.Price"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Tồn kho <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" asp-for="Input.Stock" min="0" max="100000" required />
+                <span class="text-danger small" asp-validation-for="Input.Stock"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Giá cũ (₫)</label>
                 <input type="number" class="form-control" asp-for="Input.OldPrice" min="0" step="any" />
+                <span class="text-danger small" asp-validation-for="Input.OldPrice"></span>
             </div>
         </div>
         <div class="col-12">
@@ -53,18 +58,11 @@
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label class="form-label">Đánh giá (0-5) <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" asp-for="Input.Rating" min="0" max="5" step="0.1" required />
-                <span class="text-danger small" asp-validation-for="Input.Rating"></span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
                 <label class="form-label">URL hình ảnh</label>
                 <input type="text" class="form-control" asp-for="Input.ImageUrl" placeholder="https://example.com/image.jpg" />
             </div>
         </div>
-        <div class="col-12">
+        <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Xem trước hình ảnh</label>
                 <div class="preview-wrapper">
@@ -84,6 +82,7 @@
 </form>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const imageInput = document.querySelector('input[asp-for="Input.ImageUrl"]');

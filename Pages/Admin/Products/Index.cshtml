@@ -1,5 +1,6 @@
 @page
 @model IndexModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Quản lý sản phẩm";
     ViewData["ActivePage"] = "Products";
@@ -17,10 +18,10 @@
     <div class="col-auto">
         <select class="form-select" asp-for="CategoryFilter">
             <option value="">Tất cả danh mục</option>
-            <option value="Giày">Giày</option>
-            <option value="Áo">Áo</option>
-            <option value="Túi">Túi</option>
-            <option value="Đồng hồ">Đồng hồ</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Name">@category.Name</option>
+            }
         </select>
     </div>
     <div class="col-auto">
@@ -54,7 +55,7 @@ else
                     <th>Danh mục</th>
                     <th class="text-end" style="width: 120px;">Giá</th>
                     <th class="text-end" style="width: 100px;">Giá cũ</th>
-                    <th class="text-end" style="width: 80px;">Đánh giá</th>
+                    <th class="text-end" style="width: 80px;">Tồn kho</th>
                     <th class="text-end" style="width: 120px;">Hành động</th>
                 </tr>
             </thead>
@@ -66,20 +67,15 @@ else
                             <img src="@p.ImageUrl" alt="@p.Name" class="img-fluid rounded" style="height: 60px; object-fit: cover;">
                         </td>
                         <td>@p.Name</td>
-                        <td>@p.Category</td>
-                        <td class="text-end">@p.PriceText</td>
+                        <td>@p.Category.Name</td>
+                        <td class="text-end">@(p.Price.ToString("N0", new CultureInfo("vi-VN")) + " ₫")</td>
                         <td class="text-end">
-                            @if (!string.IsNullOrEmpty(p.OldPriceText))
+                            @if (p.OldPrice.HasValue)
                             {
-                                <span class="text-decoration-line-through">@p.OldPriceText</span>
+                                <span class="text-decoration-line-through">@(p.OldPrice.Value.ToString("N0", new CultureInfo("vi-VN")) + " ₫")</span>
                             }
                         </td>
-                        <td class="text-end">
-                            @for (int i = 0; i < 5; i++)
-                            {
-                                <i class="bi @(i < p.Rating ? "bi-star-fill" : "bi-star") text-warning"></i>
-                            }
-                        </td>
+                        <td class="text-end">@p.Stock</td>
                         <td class="text-end">
                             <a asp-page="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-pencil"></i> Sửa

@@ -45,14 +45,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
-        <form method="post">
+        <form method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="mb-3">
-                <label class="form-label">Email</label>
+                <label class="form-label">Email <span class="text-danger">*</span></label>
                 <input type="email" class="form-control" asp-for="Input.Email" required />
+                <span class="text-danger small" asp-validation-for="Input.Email"></span>
             </div>
             <div class="mb-3">
-                <label class="form-label">Mật khẩu</label>
+                <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
                 <input type="password" class="form-control" asp-for="Input.Password" required />
+                <span class="text-danger small" asp-validation-for="Input.Password"></span>
             </div>
             <div class="mb-3 d-flex align-items-center">
                 <input type="checkbox" class="form-check-input me-2" asp-for="Input.RememberMe" />
@@ -67,4 +70,8 @@
         </div>
     </div>
 </body>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
 </html>

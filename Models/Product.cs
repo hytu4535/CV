@@ -1,24 +1,36 @@
-﻿using System;
-using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopUI.Models
 {
     public class Product
     {
         public int Id { get; set; }
+
+        [Required]
+        [MaxLength(150)]
         public string Name { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
+
+        [Required]
+        public int CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category? Category { get; set; }
+
+        [Required]
+        [Range(1000, 1000000000)]
         public decimal Price { get; set; }
+
         public decimal? OldPrice { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public double Rating { get; set; }
 
-        private static readonly CultureInfo Vn = new CultureInfo("vi-VN");
+        [Required]
+        [Range(0, 100000)]
+        public int Stock { get; set; }
 
-        public string PriceText => Price.ToString("N0", Vn) + " ₫";
-        public string OldPriceText => OldPrice.HasValue ? OldPrice.Value.ToString("N0", Vn) + " ₫" : "";
-        public int DiscountPercent =>
-            OldPrice.HasValue && OldPrice > 0 ? (int)Math.Round((1 - Price / OldPrice.Value) * 100) : 0;
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
+
+        [MaxLength(1000)]
+        public string? Description { get; set; }
     }
 }

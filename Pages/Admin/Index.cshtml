@@ -73,9 +73,7 @@
             <div class="col-xl-6">
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Tỷ lệ trạng thái đơn hàng</h5>
-                        </div>
+                        <h5 class="mb-0">Tỷ lệ trạng thái đơn hàng</h5>
                     </div>
                     <div class="card-body p-0">
                         <canvas id="statusChart" height="200"></canvas>
@@ -103,13 +101,23 @@
                                 @foreach (var order in Model.LatestOrders)
                                 {
                                     <tr>
-                                        <td>#DH000@order.Id</td>
-                                        <td>@order.CustomerName</td>
-                                        <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
-                                        <td class="text-end">@order.Total.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                                        <td>#DH@order.Id.ToString("D4")</td>
+                                        <td>@order.Customer.FullName</td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
                                         <td>
-                                            <span class="badge badge-status @order.StatusBadgeClass">
-                                                @order.StatusText
+                                            @{
+                                                var badgeClass = order.Status switch
+                                                {
+                                                    OrderStatus.Pending => "bg-warning text-dark",
+                                                    OrderStatus.Shipping => "bg-info text-white",
+                                                    OrderStatus.Completed => "bg-success text-white",
+                                                    OrderStatus.Cancelled => "bg-danger text-white",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @badgeClass">
+                                                @order.StatusVietnamese
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -143,26 +151,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var product in Model.TopProducts)
+                        @foreach (var top in Model.TopProductsView)
                         {
                             <tr>
                                 <td>
-                                    <img src="@product.ImageUrl" alt="@product.Name" class="img-thumbnail" style="width: 60px;">
+                                    <img src="@top.Product.ImageUrl" alt="@top.Product.Name" class="img-thumbnail" style="width: 60px;">
                                 </td>
-                                <td>@product.Name</td>
-                                <td>@product.Category</td>
-                                <td class="text-end">@product.PriceText</td>
-                                <td class="text-end">
-                                    @{
-                                        int sold = 0;
-                                        foreach (var order in OrderData.All)
-                                        {
-                                            var item = order.Items.FirstOrDefault(i => i.Product.Id == product.Id);
-                                            if (item != null) sold += item.Quantity;
-                                        }
-                                    }
-                                    @sold
-                                </td>
+                                <td>@top.Product.Name</td>
+                                <td>@top.Product.Category.Name</td>
+                                <td class="text-end">@(top.Product.Price.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                                <td class="text-end">@top.SoldQuantity</td>
                             </tr>
                         }
                     </tbody>
@@ -201,15 +199,6 @@
                             callbacks: {
                                 label: function(context) {
                                     return '₫' + (context.parsed.y * 1000000).toLocaleString('vi-VN');
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: {
-                                callback: function(value) {
-                                    return '₫' + (value * 1000000).toLocaleString('vi-VN');
                                 }
                             }
                         }

@@ -123,6 +123,13 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     border-color: var(--pink-500);
     box-shadow: 0 0 0 0.25rem rgba(232,130,158,.25);
 }
+.field-validation-error {
+    color: var(--pink-500);
+}
+.input-validation-error {
+    border-color: var(--pink-500) !important;
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.25);
+}
 
 /* Checkboxes and radios */
 .form-check-input:checked {

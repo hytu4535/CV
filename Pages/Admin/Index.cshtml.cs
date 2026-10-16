@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using ShopUI.Models;
 using ShopUI.Data;
 
@@ -11,6 +13,13 @@ namespace ShopUI.Pages.Admin
 {
     public class IndexModel : PageModel
     {
+        private readonly ShopDbContext _context;
+
+        public IndexModel(ShopDbContext context)
+        {
+            _context = context;
+        }
+
         public int TotalRevenue { get; set; }
         public int TotalOrders { get; set; }
         public int TotalCustomers { get; set; }
@@ -24,15 +33,20 @@ namespace ShopUI.Pages.Admin
         public List<string> StatusColors { get; set; } = new();
 
         public List<Order> LatestOrders { get; set; } = new();
-        public List<Product> TopProducts { get; set; } = new();
+        public class TopProductView
+        {
+            public Product Product { get; set; } = default!;
+            public int SoldQuantity { get; set; }
+        }
+        public List<TopProductView> TopProductsView { get; set; } = new();
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             // Stats
-            TotalRevenue = (int)OrderData.All.Sum(o => o.Total);
-            TotalOrders = OrderData.All.Count;
-            TotalCustomers = CustomerData.All.Count;
-            TotalProducts = ProductData.All.Count;
+            TotalRevenue = (int)await _context.Orders.SumAsync(o => o.TotalAmount);
+            TotalOrders = await _context.Orders.CountAsync();
+            TotalCustomers = await _context.Customers.CountAsync();
+            TotalProducts = await _context.Products.CountAsync();
 
             // Revenue last 6 months
             var today = DateTime.Today;
@@ -41,19 +55,22 @@ namespace ShopUI.Pages.Admin
                 var month = today.AddMonths(-i);
                 var label = month.ToString("MMM yyyy", new CultureInfo("vi-VN"));
                 RevenueLabels.Add(label);
-                var revenue = (int)OrderData.All
-                    .Where(o => o.CreatedAt.Year == month.Year && o.CreatedAt.Month == month.Month)
-                    .Sum(o => o.Total);
+                var revenue = (int)await _context.Orders
+                    .Where(o => o.OrderDate.Year == month.Year && o.OrderDate.Month == month.Month)
+                    .SumAsync(o => o.TotalAmount);
                 RevenueValues.Add(revenue);
             }
 
             // Order status distribution
-            var statusGroups = OrderData.All.GroupBy(o => o.Status);
+            var statusGroups = await _context.Orders
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
             foreach (var group in statusGroups)
             {
-                StatusLabels.Add(group.Key.ToString());
-                StatusValues.Add(group.Count());
-                StatusColors.Add(group.Key switch
+                StatusLabels.Add(group.Status.ToString());
+                StatusValues.Add(group.Count);
+                StatusColors.Add(group.Status switch
                 {
                     OrderStatus.Pending => "warning",
                     OrderStatus.Shipping => "info",
@@ -64,31 +81,39 @@ namespace ShopUI.Pages.Admin
             }
 
             // Latest 5 orders
-            LatestOrders = OrderData.All
-                .OrderByDescending(o => o.CreatedAt)
+            LatestOrders = await _context.Orders
+                .Include(o => o.Customer)
+                .OrderByDescending(o => o.OrderDate)
                 .Take(5)
-                .ToList();
+                .ToListAsync();
 
             // Top 5 selling products by quantity sold
-            var productQuantities = new Dictionary<int, int>();
-            foreach (var order in OrderData.All)
+            var topProductsQuery = await _context.OrderDetails
+                .GroupBy(od => od.ProductId)
+                .Select(g => new { ProductId = g.Key, SoldQuantity = g.Sum(od => od.Quantity) })
+                .OrderByDescending(g => g.SoldQuantity)
+                .Take(5)
+                .ToListAsync();
+
+            var topProductIds = topProductsQuery.Select(p => p.ProductId).ToList();
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .Where(p => topProductIds.Contains(p.Id))
+                .ToListAsync();
+
+            TopProductsView = new List<TopProductView>();
+            foreach (var tp in topProductsQuery)
             {
-                foreach (var item in order.Items)
+                var product = products.FirstOrDefault(p => p.Id == tp.ProductId);
+                if (product != null)
                 {
-                    if (!productQuantities.ContainsKey(item.Product.Id))
-                        productQuantities[item.Product.Id] = 0;
-                    productQuantities[item.Product.Id] += item.Quantity;
+                    TopProductsView.Add(new TopProductView
+                    {
+                        Product = product,
+                        SoldQuantity = tp.SoldQuantity
+                    });
                 }
             }
-            var topProductIds = productQuantities
-                .OrderByDescending(kv => kv.Value)
-                .Take(5)
-                .Select(kv => kv.Key)
-                .ToList();
-            TopProducts = ProductData.All
-                .Where(p => topProductIds.Contains(p.Id))
-                .OrderByDescending(p => productQuantities[p.Id])
-                .ToList();
         }
     }
 }

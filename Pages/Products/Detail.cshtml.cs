@@ -1,25 +1,45 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ShopUI.Data;
+using Microsoft.EntityFrameworkCore;
 using ShopUI.Models;
+using ShopUI.Data;
 
-namespace ShopUI.Pages.Products;
-
-public class DetailsModel : PageModel
+namespace ShopUI.Pages.Products
 {
-    public Product Product { get; set; } = new();
-    public List<Product> Related { get; set; } = new();
-
-    public IActionResult OnGet(int id)
+    public class DetailsModel : PageModel
     {
-        var product = ProductData.GetById(id);
-        if (product == null) return NotFound();
+        private readonly ShopDbContext _context;
 
-        Product = product;
-        Related = ProductData.All
-            .Where(p => p.Category == product.Category && p.Id != product.Id)
-            .Take(4).ToList();
+        public DetailsModel(ShopDbContext context)
+        {
+            _context = context;
+        }
 
-        return Page();
+        public Product Product { get; set; } = default!;
+        public List<Product> Related { get; set; } = new();
+
+        public async Task<IActionResult> OnGetAsync(int id)
+        {
+            Product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (Product == null)
+            {
+                return NotFound();
+            }
+
+            Related = await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Category.Id == Product.Category.Id && p.Id != Product.Id)
+                .Take(4)
+                .ToListAsync();
+
+            return Page();
+        }
     }
 }

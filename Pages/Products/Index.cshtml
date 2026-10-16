@@ -48,7 +48,6 @@
                         <option value="" selected="@(string.IsNullOrEmpty(Model.Sort))">Mặc định</option>
                         <option value="price_asc" selected="@(Model.Sort == "price_asc")">Giá tăng dần</option>
                         <option value="price_desc" selected="@(Model.Sort == "price_desc")">Giá giảm dần</option>
-                        <option value="rating" selected="@(Model.Sort == "rating")">Đánh giá cao</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -73,7 +72,7 @@
                     </div>
                 }
             </div>
-            
+
             <!-- Pagination -->
             @if (Model.TotalPages > 1)
             {
@@ -81,8 +80,8 @@
                     <ul class="pagination justify-content-center mt-4">
                         <!-- Previous page -->
                         <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
-                            <a class="page-link" 
-                               asp-page="./Index" 
+                            <a class="page-link"
+                               asp-page="./Index"
                                asp-route-Category="@Model.Category"
                                asp-route-Search="@Model.Search"
                                asp-route-Sort="@Model.Sort"
@@ -90,13 +89,13 @@
                                 « Trước
                             </a>
                         </li>
-                        
+
                         <!-- Page numbers -->
                         @for (int i = 1; i <= Model.TotalPages; i++)
                         {
                             <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                                <a class="page-link" 
-                                   asp-page="./Index" 
+                                <a class="page-link"
+                                   asp-page="./Index"
                                    asp-route-Category="@Model.Category"
                                    asp-route-Search="@Model.Search"
                                    asp-route-Sort="@Model.Sort"
@@ -105,11 +104,11 @@
                                 </a>
                             </li>
                         }
-                        
+
                         <!-- Next page -->
                         <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
-                            <a class="page-link" 
-                               asp-page="./Index" 
+                            <a class="page-link"
+                               asp-page="./Index"
                                asp-route-Category="@Model.Category"
                                asp-route-Search="@Model.Search"
                                asp-route-Sort="@Model.Sort"

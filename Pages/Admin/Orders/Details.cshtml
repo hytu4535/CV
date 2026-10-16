@@ -2,7 +2,7 @@
 @model DetailsModel
 @using System.Globalization
 @{
-    ViewData["Title"] = "Chi tiết đơn hàng #DH000@Model.Order.Id";
+    ViewData["Title"] = "Chi tiết đơn hàng #DH" + Model.Order.Id.ToString("D4");
     ViewData["ActivePage"] = "Orders";
 }
 
@@ -25,9 +25,9 @@
                 <h5 class="mb-0">Thông tin khách hàng</h5>
             </div>
             <div class="card-body">
-                <p><strong>Họ tên:</strong> @Model.Order.CustomerName</p>
-                <p><strong>Số điện thoại:</strong> @Model.Order.Phone</p>
-                <p><strong>Địa chỉ:</strong> @Model.Order.Address</p>
+                <p><strong>Họ tên:</strong> @Model.Order.Customer.FullName</p>
+                <p><strong>Số điện thoại:</strong> @Model.Order.Customer.Phone</p>
+                <p><strong>Địa chỉ:</strong> @Model.Order.Customer.Address</p>
             </div>
         </div>
     </div>
@@ -37,11 +37,21 @@
                 <h5 class="mb-0">Thông tin đơn hàng</h5>
             </div>
             <div class="card-body">
-                <p><strong>Mã đơn:</strong> #DH000@Model.Order.Id</p>
-                <p><strong>Ngày đặt:</strong> @Model.Order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Mã đơn:</strong> #DH@Model.Order.Id.ToString("D4")</p>
+                <p><strong>Ngày đặt:</strong> @Model.Order.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
                 <p><strong>Trạng thái hiện tại:</strong>
-                    <span class="badge badge-status @Model.Order.StatusBadgeClass">
-                        @Model.Order.StatusText
+                    @{
+                        var badgeClass = Model.Order.Status switch
+                        {
+                            OrderStatus.Pending => "bg-warning text-dark",
+                            OrderStatus.Shipping => "bg-info text-white",
+                            OrderStatus.Completed => "bg-success text-white",
+                            OrderStatus.Cancelled => "bg-danger text-white",
+                                                        _ => "bg-secondary"
+                        };
+                    }
+                    <span class="badge @badgeClass">
+                        @Model.Order.StatusVietnamese
                     </span>
                 </p>
             </div>
@@ -65,23 +75,23 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Order.Items)
+                @foreach (var detail in Model.Order.Details)
                 {
                     <tr>
                         <td>
-                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="img-fluid rounded" style="height: 50px; object-fit: cover;">
+                            <img src="@detail.Product.ImageUrl" alt="@detail.Product.Name" class="img-fluid rounded" style="height: 50px; object-fit: cover;">
                         </td>
-                        <td>@item.Product.Name</td>
-                        <td class="text-center">@item.Quantity</td>
-                        <td class="text-end">@item.Product.PriceText</td>
-                        <td class="text-end">@item.TotalText</td>
+                        <td>@detail.Product.Name</td>
+                        <td class="text-center">@detail.Quantity</td>
+                        <td class="text-end">@(detail.UnitPrice.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                        <td class="text-end">@((detail.Quantity * detail.UnitPrice).ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
                     </tr>
                 }
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
-                    <td class="text-end fw-bold">@Model.Order.Total.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                    <td class="text-end fw-bold">@(Model.Order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
                 </tr>
             </tfoot>
         </table>
@@ -94,16 +104,18 @@
             <h5 class="mb-0">Cập nhật trạng thái</h5>
         </div>
         <div class="card-body">
-            <form method="post">
+            <form method="post" novalidate>
                 <input type="hidden" asp-for="Order.Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="mb-3">
-                    <label class="form-label">Trạng thái mới</label>
+                    <label class="form-label">Trạng thái mới <span class="text-danger">*</span></label>
                     <select class="form-select" asp-for="NewStatus">
                         <option value="Pending">Chờ xử lý</option>
                         <option value="Shipping">Đang giao</option>
                         <option value="Completed">Hoàn thành</option>
                         <option value="Cancelled">Đã hủy</option>
                     </select>
+                    <span class="text-danger small" asp-validation-for="NewStatus"></span>
                 </div>
                 <button type="submit" class="btn btn-primary me-2">
                     <i class="bi bi-check-lg"></i> Cập nhật
@@ -115,3 +127,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
