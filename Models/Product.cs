@@ -21,11 +21,12 @@ namespace ShopUI.Models
         [Range(1000, 1000000000)]
         public decimal Price { get; set; }
 
-        public decimal? OldPrice { get; set; }
-
         [Required]
         [Range(0, 100000)]
         public int Stock { get; set; }
+
+        [Range(1000, 1000000000)]
+        public decimal? OldPrice { get; set; }
 
         [MaxLength(500)]
         public string? ImageUrl { get; set; }

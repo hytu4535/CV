@@ -40,9 +40,6 @@ namespace ShopUI.Pages.Admin.Products
             [Range(1000, 1000000000, ErrorMessage = "Giá phải từ 1000 đến 1.000.000.000")]
             public decimal Price { get; set; }
 
-            [GreaterThanProperty("Price")]
-            public decimal? OldPrice { get; set; }
-
             [Required(ErrorMessage = "Tồn kho không được để trống.")]
             [Range(0, 100000, ErrorMessage = "Tồn kho phải từ 0 đến 100.000")]
             public int? Stock { get; set; }
@@ -54,6 +51,10 @@ namespace ShopUI.Pages.Admin.Products
             [Required(ErrorMessage = "Mô tả không được để trống.")]
             [StringLength(1000)]
             public string? Description { get; set; }
+
+            [GreaterThanProperty("Price", ErrorMessage = "Giá cũ phải lớn hơn giá bán hiện tại.")]
+            [Range(1000, 1000000000, ErrorMessage = "Giá cũ phải từ 1000 đến 1.000.000.000")]
+            public decimal? OldPrice { get; set; }
         }
 
         public SelectList CategoryList { get; set; } = default!;
@@ -75,10 +76,10 @@ namespace ShopUI.Pages.Admin.Products
                 Name = product.Name,
                 CategoryId = product.CategoryId,
                 Price = product.Price,
-                OldPrice = product.OldPrice,
                 Stock = product.Stock,
                 ImageUrl = product.ImageUrl,
-                Description = product.Description
+                Description = product.Description,
+                OldPrice = product.OldPrice
             };
 
             await LoadCategoriesAsync();
@@ -99,14 +100,6 @@ namespace ShopUI.Pages.Admin.Products
                 return Page();
             }
 
-            // Additional validation: OldPrice > Price if OldPrice has value
-            if (Input.OldPrice.HasValue && Input.OldPrice <= Input.Price)
-            {
-                ModelState.AddModelError("Input.OldPrice", "Giá cũ phải lớn hơn giá mới.");
-                await LoadCategoriesAsync();
-                return Page();
-            }
-
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
@@ -116,10 +109,10 @@ namespace ShopUI.Pages.Admin.Products
             product.Name = Input.Name;
             product.CategoryId = Input.CategoryId;
             product.Price = Input.Price;
-            product.OldPrice = Input.OldPrice;
             product.Stock = Input.Stock.Value;
             product.ImageUrl = Input.ImageUrl;
             product.Description = Input.Description;
+            product.OldPrice = Input.OldPrice;
 
             try
             {

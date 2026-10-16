@@ -32,14 +32,6 @@
     </div>
 </form>
 
-@if (TempData["Msg"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["Msg"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
 @if (Model.TotalItems == 0)
 {
     <div class="alert alert-info">Không tìm thấy sản phẩm nào.</div>
@@ -54,7 +46,6 @@ else
                     <th>Tên sản phẩm</th>
                     <th>Danh mục</th>
                     <th class="text-end" style="width: 120px;">Giá</th>
-                    <th class="text-end" style="width: 100px;">Giá cũ</th>
                     <th class="text-end" style="width: 80px;">Tồn kho</th>
                     <th class="text-end" style="width: 120px;">Hành động</th>
                 </tr>
@@ -68,13 +59,7 @@ else
                         </td>
                         <td>@p.Name</td>
                         <td>@p.Category.Name</td>
-                        <td class="text-end">@(p.Price.ToString("N0", new CultureInfo("vi-VN")) + " ₫")</td>
-                        <td class="text-end">
-                            @if (p.OldPrice.HasValue)
-                            {
-                                <span class="text-decoration-line-through">@(p.OldPrice.Value.ToString("N0", new CultureInfo("vi-VN")) + " ₫")</span>
-                            }
-                        </td>
+                        <td class="text-end">@(p.Price.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
                         <td class="text-end">@p.Stock</td>
                         <td class="text-end">
                             <a asp-page="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary me-1">
@@ -88,68 +73,68 @@ else
                 }
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination justify-content-center mt-4">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber - 1)">« Trước</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled"><span class="page-link">« Trước</span></li>
+                    }
+
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber + 1)">Sau »</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled"><span class="page-link">Sau »</span></li>
+                    }
+                </ul>
+            </nav>
+        }
     </div>
 
-    <!-- Pagination -->
-    @if (Model.TotalPages > 1)
+    <!-- Delete Confirmation Modals -->
+    @foreach (var p in Model.Products)
     {
-        <nav>
-            <ul class="pagination justify-content-center mt-4">
-                @if (Model.PageNumber > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber - 1)">« Trước</a>
-                    </li>
-                }
-                else
-                {
-                    <li class="page-item disabled"><span class="page-link">« Trước</span></li>
-                }
-
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@i">@i</a>
-                    </li>
-                }
-
-                @if (Model.PageNumber < Model.TotalPages)
-                {
-                    <li class="page-item">
-                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber + 1)">Sau »</a>
-                    </li>
-                }
-                else
-                {
-                    <li class="page-item disabled"><span class="page-link">Sau »</span></li>
-                }
-            </ul>
-        </nav>
-    }
-}
-
-<!-- Delete Confirmation Modals -->
-@foreach (var p in Model.Products)
-{
-    <div class="modal fade" id="deleteModal_@p.Id" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Bạn có chắc chắn muốn xóa sản phẩm "<strong>@p.Name</strong>"?</p>
-                    <p class="text-muted">Hành động này không thể khôi phục.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <form method="post" asp-page-handler="Delete">
-                        <input type="hidden" name="id" value="@p.Id" />
-                        <button type="submit" class="btn btn-danger">Xóa</button>
-                    </form>
+        <div class="modal fade" id="deleteModal_@p.Id" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa sản phẩm "<strong>@p.Name</strong>"?</p>
+                        <p class="text-muted">Hành động này không thể khôi phục.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <form method="post" asp-page-handler="Delete">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="btn btn-danger">Xóa</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 }

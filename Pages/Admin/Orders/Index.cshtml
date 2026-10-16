@@ -41,6 +41,7 @@
         </div>
     </nav>
     <div class="tab-content mt-3" id="orderStatusTabContent">
+        <!-- All tab -->
         <div class="tab-pane fade @((string.IsNullOrEmpty(Model.StatusFilter) ? "show active" : ""))" id="tab-all-content" role="tabpanel" aria-labelledby="tab-all">
             @if (Model.StatusFilter == "")
             {
@@ -91,9 +92,12 @@
                 </div>
             }
         </div>
+
+        <!-- Individual status tabs -->
         @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
         {
             var statusName = status.ToString();
+            var count = Model.StatusCounts.GetValueOrDefault(status, 0);
             <div class="tab-pane fade @(Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase) ? "show active" : "")" id="tab-@statusName-content" role="tabpanel" aria-labelledby="tab-@statusName">
                 @if (Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -147,11 +151,3 @@
         }
     </div>
 </div>
-
-@if (TempData["Msg"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["Msg"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
