@@ -1,0 +1,30 @@
+@model Product
+
+<div class="card product-card position-relative">
+    @if (Model.DiscountPercent > 0)
+    {
+        <span class="badge-sale">-@Model.DiscountPercent%</span>
+    }
+    <a asp-page="/Products/Detail" asp-route-id="@Model.Id">
+        <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" />
+    </a>
+    <div class="card-body d-flex flex-column">
+        <small class="text-muted">@Model.Category</small>
+        <h6 class="card-title mt-1">
+            <a asp-page="/Products/Detail" asp-route-id="@Model.Id">@Model.Name</a>
+        </h6>
+        <div class="rating mb-2">
+            <i class="bi bi-star-fill"></i> @Model.Rating.ToString("0.0")
+        </div>
+        <div class="mt-auto">
+            <span class="price">@Model.PriceText</span>
+            @if (Model.OldPrice.HasValue)
+            {
+                <span class="old-price ms-1">@Model.OldPriceText</span>
+            }
+            <a asp-page="/Cart" class="btn btn-primary btn-sm w-100 mt-2">
+                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+            </a>
+        </div>
+    </div>
+</div>

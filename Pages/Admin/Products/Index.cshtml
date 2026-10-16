@@ -1,0 +1,159 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    ViewData["ActivePage"] = "Products";
+}
+
+<a asp-page="Create" class="btn btn-primary mb-3">
+    <i class="bi bi-plus-lg"></i> Thêm sản phẩm
+</a>
+
+<!-- Search and Filter -->
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên sản phẩm..." />
+    </div>
+    <div class="col-auto">
+        <select class="form-select" asp-for="CategoryFilter">
+            <option value="">Tất cả danh mục</option>
+            <option value="Giày">Giày</option>
+            <option value="Áo">Áo</option>
+            <option value="Túi">Túi</option>
+            <option value="Đồng hồ">Đồng hồ</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Lọc</button>
+    </div>
+    <div class="col-auto">
+        <a asp-page="./Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Msg"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.TotalItems == 0)
+{
+    <div class="alert alert-info">Không tìm thấy sản phẩm nào.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-align-middle table-admin">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th class="text-end" style="width: 120px;">Giá</th>
+                    <th class="text-end" style="width: 100px;">Giá cũ</th>
+                    <th class="text-end" style="width: 80px;">Đánh giá</th>
+                    <th class="text-end" style="width: 120px;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Products)
+                {
+                    <tr>
+                        <td>
+                            <img src="@p.ImageUrl" alt="@p.Name" class="img-fluid rounded" style="height: 60px; object-fit: cover;">
+                        </td>
+                        <td>@p.Name</td>
+                        <td>@p.Category</td>
+                        <td class="text-end">@p.PriceText</td>
+                        <td class="text-end">
+                            @if (!string.IsNullOrEmpty(p.OldPriceText))
+                            {
+                                <span class="text-decoration-line-through">@p.OldPriceText</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <i class="bi @(i < p.Rating ? "bi-star-fill" : "bi-star") text-warning"></i>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil"></i> Sửa
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal_@p.Id">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination justify-content-center mt-4">
+                @if (Model.PageNumber > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber - 1)">« Trước</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">« Trước</span></li>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-CategoryFilter="@Model.CategoryFilter" asp-route-pageNumber="@(Model.PageNumber + 1)">Sau »</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Sau »</span></li>
+                }
+            </ul>
+        </nav>
+    }
+}
+
+<!-- Delete Confirmation Modals -->
+@foreach (var p in Model.Products)
+{
+    <div class="modal fade" id="deleteModal_@p.Id" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa sản phẩm "<strong>@p.Name</strong>"?</p>
+                    <p class="text-muted">Hành động này không thể khôi phục.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form method="post" asp-page-handler="Delete">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

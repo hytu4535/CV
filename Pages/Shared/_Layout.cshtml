@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MyShop</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="top-bar text-center py-1 small">
+        Miễn phí vận chuyển cho đơn từ 500.000 ₫ 🚚
+    </div>
+
+    <header class="bg-white border-bottom sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg container">
+            <a class="navbar-brand fw-bold brand" asp-page="/Index">
+                <i class="bi bi-bag-heart-fill"></i> MyShop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" asp-page="/Index">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Products/Index">Sản phẩm</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Products/Index" asp-route-Category="Giày">Giày</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Products/Index" asp-route-Category="Áo">Áo</a></li>
+                </ul>
+                <form class="d-flex me-3" method="get" asp-page="/Products/Index">
+                    <input class="form-control form-control-sm" type="search" name="Search" placeholder="Tìm sản phẩm..." />
+                    <button class="btn btn-sm btn-dark ms-1" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+                <a class="btn btn-outline-dark btn-sm position-relative" asp-page="/Cart">
+                    <i class="bi bi-cart3"></i> Giỏ hàng
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer mt-5 pt-5 pb-3">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h5 class="text-white"><i class="bi bi-bag-heart-fill"></i> MyShop</h5>
+                    <p class="small">Thời trang và phụ kiện chất lượng, giá tốt mỗi ngày.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-white">Liên kết</h6>
+                    <ul class="list-unstyled small">
+                        <li><a asp-page="/Index">Trang chủ</a></li>
+                        <li><a asp-page="/Products/Index">Sản phẩm</a></li>
+                        <li><a asp-page="/Cart">Giỏ hàng</a></li>
+                        <li><a asp-page="/Admin/Index">Quản trị</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-white">Liên hệ</h6>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-telephone"></i> 0123 456 789</li>
+                        <li><i class="bi bi-envelope"></i> hello@myshop.vn</li>
+                        <li><i class="bi bi-geo-alt"></i> TP. Hồ Chí Minh</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary" />
+            <div class="text-center small">© 2026 MyShop. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,76 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+@if (TempData["Msg"] is string msg)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @msg
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Hero -->
+<section class="hero mb-5">
+    <h1 class="display-5 fw-bold">Siêu sale mùa hè – giảm đến 30%</h1>
+    <p class="lead">Hàng ngàn sản phẩm thời trang chính hãng, giao hàng nhanh toàn quốc.</p>
+    <a asp-page="/Products/Index" class="btn btn-light btn-lg">Mua sắm ngay</a>
+</section>
+
+<!-- Danh mục -->
+<section class="mb-5">
+    <h4 class="mb-3">Danh mục</h4>
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a class="cat-tile" asp-page="/Products/Index" asp-route-Category="Giày">
+                <i class="bi bi-bootstrap-reboot"></i><div class="mt-2 fw-semibold">Giày</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="cat-tile" asp-page="/Products/Index" asp-route-Category="Áo">
+                <i class="bi bi-person-standing"></i><div class="mt-2 fw-semibold">Áo</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="cat-tile" asp-page="/Products/Index" asp-route-Category="Túi">
+                <i class="bi bi-handbag"></i><div class="mt-2 fw-semibold">Túi</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="cat-tile" asp-page="/Products/Index" asp-route-Category="Đồng hồ">
+                <i class="bi bi-watch"></i><div class="mt-2 fw-semibold">Đồng hồ</div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Đang giảm giá -->
+<section class="mb-5">
+    <h4 class="mb-3">🔥 Đang giảm giá</h4>
+    <div class="row g-3">
+        @foreach (var p in Model.Sale)
+        {
+            <div class="col-6 col-md-3">
+                <partial name="_HomeProductCard" model="p" />
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Nổi bật -->
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Sản phẩm nổi bật</h4>
+        <a asp-page="/Products/Index">Xem tất cả →</a>
+    </div>
+    <div class="row g-3">
+        @foreach (var p in Model.Featured)
+        {
+            <div class="col-6 col-md-3">
+                <partial name="_HomeProductCard" model="p" />
+            </div>
+        }
+    </div>
+</section>

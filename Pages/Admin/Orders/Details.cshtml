@@ -1,0 +1,117 @@
+@page "{id:int}"
+@model DetailsModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng #DH000@Model.Order.Id";
+    ViewData["ActivePage"] = "Orders";
+}
+
+<a asp-page="Index" class="btn btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+</a>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Msg"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Thông tin khách hàng</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Họ tên:</strong> @Model.Order.CustomerName</p>
+                <p><strong>Số điện thoại:</strong> @Model.Order.Phone</p>
+                <p><strong>Địa chỉ:</strong> @Model.Order.Address</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Thông tin đơn hàng</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Mã đơn:</strong> #DH000@Model.Order.Id</p>
+                <p><strong>Ngày đặt:</strong> @Model.Order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Trạng thái hiện tại:</strong>
+                    <span class="badge badge-status @Model.Order.StatusBadgeClass">
+                        @Model.Order.StatusText
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Sản phẩm trong đơn</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th class="text-center" style="width: 80px;">Số lượng</th>
+                    <th class="text-end" style="width: 120px;">Đơn giá</th>
+                    <th class="text-end" style="width: 120px;">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Order.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="img-fluid rounded" style="height: 50px; object-fit: cover;">
+                        </td>
+                        <td>@item.Product.Name</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.Product.PriceText</td>
+                        <td class="text-end">@item.TotalText</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                    <td class="text-end fw-bold">@Model.Order.Total.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Cập nhật trạng thái</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" asp-for="Order.Id" />
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái mới</label>
+                    <select class="form-select" asp-for="NewStatus">
+                        <option value="Pending">Chờ xử lý</option>
+                        <option value="Shipping">Đang giao</option>
+                        <option value="Completed">Hoàn thành</option>
+                        <option value="Cancelled">Đã hủy</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-check-lg"></i> Cập nhật
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+                    <i class="bi bi-printer"></i> In
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,325 @@
+:root {
+    /* Pink palette */
+    --pink-50: #FFF5F7;
+    --pink-100: #FFE4EC;
+    --pink-200: #FFCFDD;
+    --pink-300: #F9B4C8;
+    --pink-500: #E8829E;
+    --pink-600: #D65A7E;
+    --pink-700: #C4486C;
+    /* Orange palette */
+    --orange-50: #FFF7F0;
+    --orange-100: #FFEAD8;
+    --orange-200: #FFD9BC;
+    --orange-300: #FFC29A;
+    --orange-500: #F39A63;
+    --orange-600: #E08A55;
+    --orange-700: #CD7A48;
+    /* Neutrals */
+    --bg: #FFF9F6; /* page background */
+    --surface: #FFFFFF;
+    --text: #5B4038; /* warm brown for primary text */
+    --text-muted: #9A7F76;
+    --border: #F6E3DC;
+    /* Gradient */
+    --gradient: linear-gradient(135deg, var(--pink-300), var(--orange-400));
+    /* Shadows */
+    --shadow-sm: 0 1px 4px rgba(232,130,158,.08);
+    --shadow: 0 8px 24px rgba(232,130,158,.15);
+}
+
+/* Typography */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Playfair Display', serif;
+    color: var(--text);
+}
+
+/* Override Bootstrap components */
+.btn-primary {
+    background-color: var(--pink-500);
+    border-color: var(--pink-500);
+    color: #fff;
+}
+.btn-primary:hover {
+    background-color: var(--pink-600);
+    border-color: var(--pink-600);
+    color: #fff;
+}
+.btn-primary:focus, .btn-primary.focus {
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.5);
+}
+
+.btn-outline-dark {
+    color: var(--pink-500);
+    border-color: var(--pink-500);
+}
+.btn-outline-dark:hover {
+    background-color: var(--pink-500);
+    border-color: var(--pink-500);
+    color: #fff;
+}
+.btn-outline-dark:focus, .btn-outline-dark.focus {
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.5);
+}
+
+/* btn-dark override: light pink fill */
+.btn-dark {
+    background-color: var(--pink-200);
+    border-color: var(--pink-200);
+    color: var(--pink-600);
+}
+.btn-dark:hover {
+    background-color: var(--pink-300);
+    border-color: var(--pink-300);
+    color: var(--pink-600);
+}
+.btn-dark:focus, .btn-dark.focus {
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.5);
+}
+
+/* Badges */
+.badge.bg-danger {
+    background-color: var(--pink-500) !important;
+    color: #fff !important;
+}
+
+/* Text colors */
+.text-danger {
+    color: var(--pink-500) !important;
+}
+
+/* Alerts */
+.alert-success {
+    background-color: var(--pink-100);
+    border-color: var(--pink-200);
+    color: var(--text);
+}
+.alert-success .alert-link {
+    color: var(--pink-500);
+}
+.alert-warning {
+    background-color: var(--orange-100);
+    border-color: var(--orange-200);
+    color: var(--text);
+}
+.alert-warning .alert-link {
+    color: var(--orange-500);
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: var(--pink-500);
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.25);
+}
+.form-select:focus {
+    border-color: var(--pink-500);
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.25);
+}
+
+/* Checkboxes and radios */
+.form-check-input:checked {
+    background-color: var(--pink-500);
+    border-color: var(--pink-500);
+}
+.form-check-input:focus {
+    border-color: var(--pink-500);
+    box-shadow: 0 0 0 0.25rem rgba(232,130,158,.25);
+}
+.btn-check:checked + .btn,
+.btn-check:active + .btn,
+.btn-check:hover + .btn,
+.btn-check:focus + .btn {
+    background-color: var(--pink-500);
+    border-color: var(--pink-500);
+    color: #fff;
+}
+
+/* Breadcrumb */
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--text-muted);
+}
+.breadcrumb-item.active {
+    color: var(--text);
+}
+.breadcrumb-item a {
+    color: var(--pink-500);
+    text-decoration: none;
+}
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+/* Pagination */
+.page-link {
+    color: var(--pink-500);
+    border-color: var(--border);
+}
+.page-link:hover {
+    background-color: var(--pink-100);
+    border-color: var(--pink-200);
+    color: var(--pink-600);
+}
+.page-item.active .page-link {
+    background-color: var(--pink-500);
+    border-color: var(--pink-500);
+    color: #fff;
+}
+
+/* Table */
+.table {
+    --bs-table-bg: var(--surface);
+    --bs-table-striped-bg: rgba(232,130,158,.05);
+    --bs-table-hover-bg: rgba(232,130,158,.1);
+    --bs-table-active-bg: rgba(232,130,158,.15);
+    border-color: var(--border);
+}
+.table th {
+    border-color: var(--border);
+}
+
+/* Custom existing classes (keep but adjust) */
+.top-bar {
+    background: var(--pink-100);
+    color: var(--text);
+}
+.brand {
+    color: var(--pink-500) !important;
+    font-size: 1.4rem;
+}
+.navbar .nav-link:hover {
+    color: var(--pink-500);
+}
+.hero {
+    background: var(--gradient);
+    color: #fff;
+    border-radius: 1rem;
+    padding: 4rem 2rem;
+}
+.hero .btn-light {
+    color: var(--pink-500);
+    font-weight: 600;
+}
+.cat-tile {
+    display: block;
+    background: var(--surface);
+    border-radius: .75rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+    transition: .2s;
+}
+.cat-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    color: var(--pink-500);
+}
+.cat-tile i {
+    font-size: 2rem;
+}
+.product-card {
+    border: 0;
+    border-radius: .75rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: .2s;
+    height: 100%;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+.product-card img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+.product-card .card-title a {
+    color: var(--text);
+    text-decoration: none;
+}
+.product-card .card-title a:hover {
+    color: var(--pink-500);
+}
+.price {
+    color: var(--pink-500);
+    font-weight: 700;
+}
+.old-price {
+    color: #9ca3af;
+    text-decoration: line-through;
+    font-size: .85rem;
+}
+.badge-sale {
+    position: absolute;
+    top: .6rem;
+    left: .6rem;
+    background: var(--pink-500);
+    color: #fff;
+    font-size: .75rem;
+    padding: .25rem .5rem;
+    border-radius: .4rem;
+}
+.rating {
+    color: #f59e0b; /* keep amber for stars */
+    font-size: .85rem;
+}
+.cart-img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: .4rem;
+}
+.qty-input {
+    width: 70px;
+}
+.site-footer {
+    background: var(--pink-50);
+    color: var(--text);
+}
+.site-footer a {
+    color: var(--text);
+    text-decoration: none;
+}
+.site-footer a:hover {
+    color: var(--pink-500);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--orange-50);
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--pink-300);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--pink-500);
+}
+
+/* Selection */
+::selection {
+    background: var(--pink-200);
+    color: var(--text);
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

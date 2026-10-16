@@ -1,0 +1,91 @@
+@model Product
+
+<div>
+    <div class="card product-card position-relative h-100">
+        @if (Model.DiscountPercent > 0)
+        {
+            <span class="badge-sale">-@Model.DiscountPercent%</span>
+        }
+        <a asp-page="/Products/Detail" asp-route-id="@Model.Id">
+            <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" />
+        </a>
+        <div class="card-body d-flex flex-column">
+            <small class="text-muted">@Model.Category</small>
+            <h6 class="card-title mt-1">
+                <a asp-page="/Products/Detail" asp-route-id="@Model.Id">@Model.Name</a>
+            </h6>
+            <div class="rating mb-2">
+                <i class="bi bi-star-fill"></i> @Model.Rating.ToString("0.0")
+            </div>
+            <div class="mb-2">
+                <span class="price fw-semibold">@Model.PriceText</span>
+                @if (Model.OldPrice.HasValue)
+                {
+                    <span class="old-price text-decoration-none ms-2">@Model.OldPriceText</span>
+                }
+            </div>
+            <div class="mt-auto d-flex gap-2">
+                <button type="button" class="btn btn-outline-dark btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#productDetailModal_@Model.Id">
+                    <i class="bi bi-info-circle"></i> Chi tiết
+                </button>
+                <a asp-page="/Cart" class="btn btn-primary btn-sm flex-fill">
+                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chi tiết sản phẩm -->
+    <div class="modal fade" id="productDetailModal_@Model.Id" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Model.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <img src="@Model.ImageUrl" class="img-fluid rounded-3" alt="@Model.Name" />
+                        </div>
+                        <div class="col-md-7">
+                            <div class="mb-3">
+                                <span class="price fs-3">@Model.PriceText</span>
+                                @if (Model.OldPrice.HasValue)
+                                {
+                                    <span class="old-price ms-2">@Model.OldPriceText</span>
+                                    <span class="badge bg-danger ms-2">-@Model.DiscountPercent%</span>
+                                }
+                            </div>
+                            <p class="text-muted">@Model.Description</p>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Kích cỡ</label><br />
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="size" id="size_@(Model.Id)_1" autocomplete="off" checked />
+                                    <label class="btn btn-outline-dark" for="size_@(Model.Id)_1">S</label>
+                                    <input type="radio" class="btn-check" name="size" id="size_@(Model.Id)_2" autocomplete="off" />
+                                    <label class="btn btn-outline-dark" for="size_@(Model.Id)_2">M</label>
+                                    <input type="radio" class="btn-check" name="size" id="size_@(Model.Id)_3" autocomplete="off" />
+                                    <label class="btn btn-outline-dark" for="size_@(Model.Id)_3">L</label>
+                                    <input type="radio" class="btn-check" name="size" id="size_@(Model.Id)_4" autocomplete="off" />
+                                    <label class="btn btn-outline-dark" for="size_@(Model.Id)_4">XL</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <label class="fw-semibold">Số lượng</label>
+                                <input type="number" class="form-control qty-input" value="1" min="1" style="width: 80px;" />
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a asp-page="/Cart" class="btn btn-primary btn-lg flex-fill"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</a>
+                                <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg flex-fill">Mua ngay</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

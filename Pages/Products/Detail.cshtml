@@ -1,0 +1,84 @@
+﻿@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = Model.Product.Name;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-page="/Products/Index">Sản phẩm</a></li>
+        <li class="breadcrumb-item"><a asp-page="/Products/Index" asp-route-Category="@Model.Product.Category">@Model.Product.Category</a></li>
+        <li class="breadcrumb-item active">@Model.Product.Name</li>
+    </ol>
+</nav>
+
+<div class="bg-white rounded-3 shadow-sm p-4">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <img src="@Model.Product.ImageUrl" class="img-fluid rounded-3 w-100" alt="@Model.Product.Name" />
+        </div>
+        <div class="col-md-7">
+            <h2>@Model.Product.Name</h2>
+            <div class="rating mb-2">
+                <i class="bi bi-star-fill"></i> @Model.Product.Rating.ToString("0.0") · Đã bán 120+
+            </div>
+
+            <div class="mb-3">
+                <span class="price fs-3">@Model.Product.PriceText</span>
+                @if (Model.Product.OldPrice.HasValue)
+                {
+                    <span class="old-price ms-2">@Model.Product.OldPriceText</span>
+                    <span class="badge bg-danger ms-2">-@Model.Product.DiscountPercent%</span>
+                }
+            </div>
+
+            <p class="text-muted">@Model.Product.Description</p>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Kích cỡ</label><br />
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="size" id="s1" checked />
+                    <label class="btn btn-outline-dark" for="s1">S</label>
+                    <input type="radio" class="btn-check" name="size" id="s2" />
+                    <label class="btn btn-outline-dark" for="s2">M</label>
+                    <input type="radio" class="btn-check" name="size" id="s3" />
+                    <label class="btn btn-outline-dark" for="s3">L</label>
+                    <input type="radio" class="btn-check" name="size" id="s4" />
+                    <label class="btn btn-outline-dark" for="s4">XL</label>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <label class="fw-semibold">Số lượng</label>
+                <input type="number" class="form-control qty-input" value="1" min="1" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-page="/Cart" class="btn btn-primary btn-lg"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</a>
+                <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg">Mua ngay</a>
+            </div>
+
+            <ul class="list-unstyled mt-4 small text-muted">
+                <li><i class="bi bi-truck"></i> Giao hàng toàn quốc 2–4 ngày</li>
+                <li><i class="bi bi-arrow-repeat"></i> Đổi trả trong 7 ngày</li>
+                <li><i class="bi bi-shield-check"></i> Cam kết chính hãng</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@if (Model.Related.Any())
+{
+    <section class="mt-5">
+        <h4 class="mb-3">Sản phẩm liên quan</h4>
+        <div class="row g-3">
+            @foreach (var p in Model.Related)
+            {
+                <div class="col-6 col-md-3">
+                    <partial name="_ProductCard" model="p" />
+                </div>
+            }
+        </div>
+    </section>
+}

@@ -1,0 +1,137 @@
+@page
+@model IndexModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    ViewData["ActivePage"] = "Orders";
+}
+
+<a asp-page="./Index" class="btn btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Quay lại
+</a>
+
+<!-- Search -->
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên khách hàng hoặc mã đơn..." />
+        <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+        <a asp-page="./Index" class="btn btn-outline-danger ms-2">Reset</a>
+    </div>
+</form>
+
+<!-- Status Tabs -->
+<div class="mb-4">
+    <nav>
+        <div class="nav nav-tabs" id="orderStatusTab" role="tablist">
+            <button class="nav-link @((string.IsNullOrEmpty(Model.StatusFilter) ? "active" : ""))"
+                    id="tab-all" data-bs-toggle="tab" data-bs-target="#tab-all-content" type="button" role="tab"
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-StatusFilter="">
+                Todas (@Model.StatusCounts.GetValueOrDefault(OrderStatus.Pending,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Shipping,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Completed,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Cancelled,0))
+            </button>
+            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                var statusName = status.ToString();
+                var count = Model.StatusCounts.GetValueOrDefault(status, 0);
+                <button class="nav-link @(Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                        id="tab-@statusName" data-bs-toggle="tab" data-bs-target="#tab-@statusName-content" type="button" role="tab"
+                        asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-StatusFilter="@statusName">
+                    @statusName (@count)
+                </button>
+            }
+        </div>
+    </nav>
+    <div class="tab-content mt-3" id="orderStatusTabContent">
+        <div class="tab-pane fade @((string.IsNullOrEmpty(Model.StatusFilter) ? "show active" : ""))" id="tab-all-content" role="tabpanel" aria-labelledby="tab-all">
+            @if (Model.StatusFilter == "")
+            {
+                <div class="table-responsive">
+                    <table class="table table-admin">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.Orders)
+                            {
+                                <tr>
+                                    <td>#DH000@order.Id</td>
+                                    <td>@order.CustomerName</td>
+                                    <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@order.Total.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                                    <td>
+                                        <span class="badge badge-status @order.StatusBadgeClass">
+                                            @order.StatusText
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+        {
+            var statusName = status.ToString();
+            <div class="tab-pane fade @(Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase) ? "show active" : "")" id="tab-@statusName-content" role="tabpanel" aria-labelledby="tab-@statusName">
+                @if (Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="table-responsive">
+                        <table class="table table-admin">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày</th>
+                                    <th class="text-end">Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.Orders.Where(o => o.Status == status))
+                                {
+                                    <tr>
+                                        <td>#DH000@order.Id</td>
+                                        <td>@order.CustomerName</td>
+                                        <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-end">@order.Total.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                                        <td>
+                                            <span class="badge badge-status @order.StatusBadgeClass">
+                                                @order.StatusText
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Msg"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}

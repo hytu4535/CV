@@ -1,0 +1,70 @@
+@page
+@model IndexModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+    ViewData["ActivePage"] = "Customers";
+}
+
+<a asp-page="Index" class="btn btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Quay lại dashboard
+</a>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên, email, SĐT, thành phố..." />
+        <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+        <a asp-page="./Index" class="btn btn-outline-danger ms-2">Reset</a>
+    </div>
+</form>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Msg"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.Customers.Count == 0)
+{
+    <div class="alert alert-info">Không tìm thấy khách hàng nào.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Avatar</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Thành phố</th>
+                    <th class="text-end">Số đơn</th>
+                    <th class="text-end">Tổng chi tiêu</th>
+                    <th class="text-end">Ngày tham gia</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Customers)
+                {
+                    <tr>
+                        <td>
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1rem;">
+                                @c.Name[0]
+                            </div>
+                        </td>
+                        <td>@c.Name</td>
+                        <td>@c.Email</td>
+                        <td>@c.Phone</td>
+                        <td>@c.City</td>
+                        <td class="text-end">@c.OrdersCount</td>
+                        <td class="text-end">@c.TotalSpent.ToString("N0", new CultureInfo("vi-VN")) ₫</td>
+                        <td class="text-end">@c.JoinedAt.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

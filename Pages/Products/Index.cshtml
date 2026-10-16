@@ -1,0 +1,125 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Sản phẩm</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Sidebar -->
+    <aside class="col-lg-3">
+        <div class="bg-white rounded-3 p-3 shadow-sm">
+            <h6 class="mb-3">Danh mục</h6>
+            <div class="list-group list-group-flush">
+                <a asp-page="/Products/Index" asp-route-Sort="@Model.Sort"
+                   asp-route-page="@Model.PageNumber"
+                   class="list-group-item list-group-item-action @(string.IsNullOrEmpty(Model.Category) ? "active" : "")">
+                    Tất cả
+                </a>
+                @foreach (var c in Model.Categories)
+                {
+                    <a asp-page="/Products/Index" asp-route-Category="@c" asp-route-Sort="@Model.Sort"
+                       asp-route-page="@Model.PageNumber"
+                       class="list-group-item list-group-item-action @(Model.Category == c ? "active" : "")">
+                        @c
+                    </a>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <!-- Nội dung -->
+    <section class="col-lg-9">
+        <form method="get" class="bg-white rounded-3 p-3 shadow-sm mb-3">
+            <input type="hidden" name="Category" value="@Model.Category" />
+            <input type="hidden" name="page" value="@Model.PageNumber" />
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input type="search" name="Search" value="@Model.Search" class="form-control" placeholder="Tìm theo tên sản phẩm..." />
+                </div>
+                <div class="col-md-4">
+                    <select name="Sort" class="form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.Sort))">Mặc định</option>
+                        <option value="price_asc" selected="@(Model.Sort == "price_asc")">Giá tăng dần</option>
+                        <option value="price_desc" selected="@(Model.Sort == "price_desc")">Giá giảm dần</option>
+                        <option value="rating" selected="@(Model.Sort == "rating")">Đánh giá cao</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-dark w-100" type="submit">Lọc</button>
+                </div>
+            </div>
+        </form>
+
+        <p class="text-muted">Tìm thấy <strong>@Model.Products.Count</strong> sản phẩm</p>
+
+        @if (Model.Products.Count == 0)
+        {
+            <div class="alert alert-warning">Không có sản phẩm phù hợp.</div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var p in Model.Products)
+                {
+                    <div class="col-6 col-md-4">
+                        <partial name="_ProductCard" model="p" />
+                    </div>
+                }
+            </div>
+            
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Trang sản phẩm">
+                    <ul class="pagination justify-content-center mt-4">
+                        <!-- Previous page -->
+                        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                            <a class="page-link" 
+                               asp-page="./Index" 
+                               asp-route-Category="@Model.Category"
+                               asp-route-Search="@Model.Search"
+                               asp-route-Sort="@Model.Sort"
+                               asp-route-page="@(Model.PageNumber - 1)">
+                                « Trước
+                            </a>
+                        </li>
+                        
+                        <!-- Page numbers -->
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" 
+                                   asp-page="./Index" 
+                                   asp-route-Category="@Model.Category"
+                                   asp-route-Search="@Model.Search"
+                                   asp-route-Sort="@Model.Sort"
+                                   asp-route-page="@i">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        
+                        <!-- Next page -->
+                        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" 
+                               asp-page="./Index" 
+                               asp-route-Category="@Model.Category"
+                               asp-route-Search="@Model.Search"
+                               asp-route-Sort="@Model.Sort"
+                               asp-route-page="@(Model.PageNumber + 1)">
+                                Sau »
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </section>
+</div>
