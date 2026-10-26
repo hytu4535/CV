@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DbFirstDemo/DbFirstDemo.csproj" />
+  <Project Path="ShopMvc.csproj" />
+</Solution>

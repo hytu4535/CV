@@ -1,0 +1,6 @@
+@model IReadOnlyList<ShopMvc.Models.Order>
+@{ ViewData["Title"] = "Quản lý đơn hàng"; }
+<h1>Quản lý đơn hàng</h1>
+<table><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+@foreach (var order in Model) { <tr><td>@order.Code</td><td>@order.User.Email</td><td>@order.TotalAmount.ToString("N0") đ</td><td>@order.Status</td><td>@if (order.Status == ShopMvc.Models.OrderStatus.Pending) { <form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Shipping" /><button>Đang giao</button></form><form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Cancelled" /><button>Hủy</button></form> } else if (order.Status == ShopMvc.Models.OrderStatus.Shipping) { <form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Completed" /><button>Hoàn thành</button></form> }</td></tr> }
+</tbody></table>

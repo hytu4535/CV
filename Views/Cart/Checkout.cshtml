@@ -1,0 +1,17 @@
+@model ShopMvc.ViewModels.CheckoutViewModel
+@{ ViewData["Title"] = "Thanh toán"; }
+<section class="page-heading"><div><p class="eyebrow">BƯỚC CUỐI</p><h1>Thông tin nhận hàng</h1></div></section>
+<section class="checkout-card">
+    <p class="muted">Thông tin tài khoản đã được tự động điền. Bạn có thể chỉnh sửa trước khi đặt hàng.</p>
+    <form asp-area="" asp-controller="Cart" asp-action="Checkout" method="post">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <div class="checkout-grid">
+            <div><label asp-for="FullName"></label><input class="input" asp-for="FullName" autocomplete="name" /><span class="field-error" asp-validation-for="FullName"></span></div>
+            <div><label asp-for="Phone"></label><input class="input" asp-for="Phone" autocomplete="tel" /><span class="field-error" asp-validation-for="Phone"></span></div>
+            <div><label asp-for="Email"></label><input class="input" asp-for="Email" autocomplete="email" /><span class="field-error" asp-validation-for="Email"></span></div>
+            <div class="wide-field"><label asp-for="Address"></label><input class="input" asp-for="Address" autocomplete="street-address" /><span class="field-error" asp-validation-for="Address"></span></div>
+            <div class="wide-field"><label asp-for="Note"></label><textarea class="input" asp-for="Note" rows="4" placeholder="Ví dụ: giao giờ hành chính..."></textarea><span class="field-error" asp-validation-for="Note"></span></div>
+        </div>
+        <div class="checkout-actions"><a class="back-link" asp-area="" asp-controller="Cart" asp-action="Index">← Quay lại giỏ hàng</a><button class="button" type="submit">Xác nhận đặt hàng</button></div>
+    </form>
+</section>

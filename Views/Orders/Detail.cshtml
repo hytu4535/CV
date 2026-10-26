@@ -1,0 +1,5 @@
+@model ShopMvc.Models.Order
+@{ ViewData["Title"] = "Chi tiết đơn hàng"; }
+<h1>Đơn hàng @Model.Code</h1><p>Trạng thái: @Model.Status</p><p>Người nhận: @Model.ReceiverName - @Model.Phone</p><p>Địa chỉ: @Model.Address</p>
+<ul>@foreach (var item in Model.Items) { <li>@item.ProductName - @item.Quantity x @item.UnitPrice.ToString("N0") đ</li> }</ul>
+@if (Model.Status == ShopMvc.Models.OrderStatus.Pending) { <form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@Model.Id" /><button type="submit">Hủy đơn</button></form> }

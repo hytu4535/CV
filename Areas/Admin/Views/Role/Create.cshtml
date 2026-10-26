@@ -1,0 +1,4 @@
+@model ShopMvc.ViewModels.RoleFormViewModel
+@{ ViewData["Title"] = "Thêm vai trò"; }
+<div class="page-heading"><h1>Thêm vai trò</h1></div>
+<form class="admin-form" asp-action="Create" method="post"><div asp-validation-summary="ModelOnly"></div><label asp-for="Name">Tên vai trò</label><input asp-for="Name" placeholder="Ví dụ: Nhân viên bán hàng" /><span asp-validation-for="Name"></span><label asp-for="Description">Mô tả vai trò</label><textarea asp-for="Description" placeholder="Nhập mô tả quyền hạn"></textarea><span asp-validation-for="Description"></span><h3>Quyền được cấp</h3><div class="permission-grid">@foreach (var permission in Model.Permissions) { <label class="permission-option"><input type="checkbox" name="PermissionIds" value="@permission.Id" /> <span><strong>@permission.Name</strong><small>@permission.Group · @permission.Code</small></span></label> }</div><button class="button" type="submit">Lưu vai trò</button></form>

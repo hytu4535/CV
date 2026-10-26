@@ -1,0 +1,4 @@
+@{ ViewData["Title"] = "Tổng quan"; }
+<div class="page-heading"><div><p class="eyebrow">TỔNG QUAN</p><h1>Dashboard</h1></div></div>
+<div class="stats-grid"><div class="stat-card"><span>Sản phẩm đang bán</span><strong>@ViewBag.Products</strong></div><div class="stat-card"><span>Sản phẩm ẩn</span><strong>@ViewBag.Hidden</strong></div><div class="stat-card"><span>Danh mục</span><strong>@ViewBag.Categories</strong></div><div class="stat-card"><span>Khách hàng</span><strong>@ViewBag.Customers</strong></div></div>
+<section class="panel"><div class="panel-heading"><h2>Sản phẩm sắp hết hàng</h2><span class="muted">Tồn kho ≤ 5</span></div><div class="table-wrap"><table><thead><tr><th>Sản phẩm</th><th>Tồn kho</th></tr></thead><tbody>@foreach (var p in ViewBag.Low) { <tr><td>@p.Name</td><td><span class="badge danger">@p.Stock</span></td></tr> }</tbody></table></div></section>
