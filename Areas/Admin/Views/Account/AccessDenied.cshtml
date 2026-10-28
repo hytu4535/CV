@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+}
+
+<section class="empty-state">
+    <p class="eyebrow">KHU VỰC QUẢN TRỊ</p>
+    <h1>Không có quyền truy cập</h1>
+    <p class="muted">Tài khoản hiện tại không được cấp quyền truy cập trang quản trị này.</p>
+    <div class="product-actions">
+        <a class="button" asp-area="Admin" asp-controller="Account" asp-action="Login">Đăng nhập tài khoản Admin</a>
+        <a class="button" href="/">Về cửa hàng</a>
+    </div>
+</section>

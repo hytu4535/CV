@@ -1,6 +1,25 @@
-@model IReadOnlyList<ShopMvc.Models.Order>
-@{ ViewData["Title"] = "Quản lý đơn hàng"; }
-<h1>Quản lý đơn hàng</h1>
-<table><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
-@foreach (var order in Model) { <tr><td>@order.Code</td><td>@order.User.Email</td><td>@order.TotalAmount.ToString("N0") đ</td><td>@order.Status</td><td>@if (order.Status == ShopMvc.Models.OrderStatus.Pending) { <form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Shipping" /><button>Đang giao</button></form><form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Cancelled" /><button>Hủy</button></form> } else if (order.Status == ShopMvc.Models.OrderStatus.Shipping) { <form asp-action="Status" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Completed" /><button>Hoàn thành</button></form> }</td></tr> }
-</tbody></table>
+@model ShopMvc.ViewModels.PagedResultViewModel<ShopMvc.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    string StatusText(ShopMvc.Models.OrderStatus status) => status switch
+    {
+        ShopMvc.Models.OrderStatus.Pending => "Chờ xử lý",
+        ShopMvc.Models.OrderStatus.Shipping => "Đang giao",
+        ShopMvc.Models.OrderStatus.Completed => "Hoàn thành",
+        ShopMvc.Models.OrderStatus.Cancelled => "Đã hủy",
+        _ => "Không xác định"
+    };
+    string StatusClass(ShopMvc.Models.OrderStatus status) => status switch
+    {
+        ShopMvc.Models.OrderStatus.Pending => "status-pending",
+        ShopMvc.Models.OrderStatus.Shipping => "status-shipping",
+        ShopMvc.Models.OrderStatus.Completed => "status-completed",
+        ShopMvc.Models.OrderStatus.Cancelled => "status-cancelled",
+        _ => "status-unknown"
+    };
+}
+<div class="page-heading"><div><p class="eyebrow">VẬN HÀNH</p><h1>Quản lý đơn hàng</h1><p class="muted">Theo dõi và cập nhật trạng thái đơn hàng.</p></div></div>
+@if (TempData["Success"] is string message) { <div class="notice success">@message</div> }
+<form class="search-form" asp-area="Admin" asp-controller="Orders" asp-action="Index" method="get"><input name="search" value="@ViewBag.Search" placeholder="Tìm mã đơn hoặc email khách hàng..." /><select name="status"><option value="">Tất cả trạng thái</option>@foreach (var item in Enum.GetValues<ShopMvc.Models.OrderStatus>()) { <option value="@item" selected="@(ViewBag.Status == item ? "selected" : null)">@StatusText(item)</option> }</select><button class="button" type="submit">Lọc</button></form>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>@foreach (var order in Model.Items) { <tr><td><strong>@order.Code</strong></td><td>@order.User.Email</td><td>@order.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td><td>@order.TotalAmount.ToString("N0") đ</td><td><span class="badge @StatusClass(order.Status)">@StatusText(order.Status)</span></td><td><div class="product-actions"><a class="button small" asp-area="Admin" asp-controller="Orders" asp-action="Detail" asp-route-id="@order.Id">Chi tiết</a>@if (order.Status == ShopMvc.Models.OrderStatus.Pending) { <form class="inline-form" asp-area="Admin" asp-controller="Orders" asp-action="Status" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Shipping" /><button class="button small" type="submit">Đang giao</button></form><form class="inline-form" asp-area="Admin" asp-controller="Orders" asp-action="Status" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Cancelled" /><button class="button small danger-button" type="submit">Hủy</button></form> } else if (order.Status == ShopMvc.Models.OrderStatus.Shipping) { <form class="inline-form" asp-area="Admin" asp-controller="Orders" asp-action="Status" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="status" value="Completed" /><button class="button small" type="submit">Hoàn thành</button></form> } else { <span class="muted">Đã kết thúc</span> }</div></td></tr> }</tbody></table></div></section>
+@if (Model.TotalPages > 1) { <div class="pagination">@for (var currentPage = 1; currentPage <= Model.TotalPages; currentPage++) { <a class="@(currentPage == Model.Page ? "button small" : "")" asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" asp-route-page="@currentPage">@currentPage</a> }</div> }

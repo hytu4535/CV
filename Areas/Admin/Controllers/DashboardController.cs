@@ -4,9 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using ShopMvc.Data;
 using ShopMvc.Helpers;
 using ShopMvc.Models;
+using ShopMvc.ViewModels;
 namespace ShopMvc.Areas.Admin.Controllers;
-[Area("Admin"), HasPermission("Dashboard.View")]
+[Area("Admin"), HasPermission(Permissions.DashboardView)]
 public class DashboardController(ShopDbContext db, UserManager<ApplicationUser> users) : Controller
 {
-    public async Task<IActionResult> Index() { ViewBag.Products = await db.Products.CountAsync(x => !x.IsDeleted && x.IsActive); ViewBag.Hidden = await db.Products.CountAsync(x => !x.IsDeleted && !x.IsActive); ViewBag.Categories = await db.Categories.CountAsync(); ViewBag.Admins = (await users.GetUsersInRoleAsync("Admin")).Count; ViewBag.Customers = (await users.GetUsersInRoleAsync("Customer")).Count; ViewBag.Low = await db.Products.Where(x => x.Stock <= 5 && !x.IsDeleted).OrderBy(x => x.Stock).ToListAsync(); ViewBag.Logs = Array.Empty<object>(); return View(); }
+    public async Task<IActionResult> Index()
+    {
+        return View(new DashboardViewModel
+        {
+            ProductCount = await db.Products.CountAsync(x => !x.IsDeleted),
+            CategoryCount = await db.Categories.CountAsync(x => !x.IsDeleted),
+            OrderCount = await db.Orders.CountAsync(),
+            AccountCount = await users.Users.CountAsync(),
+            LatestOrders = await db.Orders.Include(x => x.User).OrderByDescending(x => x.CreatedAt).Take(10).ToListAsync()
+        });
+    }
 }

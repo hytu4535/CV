@@ -9,17 +9,24 @@ using ShopMvc.ViewModels;
 namespace ShopMvc.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[HasPermission("Product.View")]
+[HasPermission(Permissions.ProductView)]
 public class ProductController(ShopDbContext db) : Controller
 {
-    public async Task<IActionResult> Index() => View(await db.Products.Include(x => x.Category).Where(x => !x.IsDeleted).OrderByDescending(x => x.CreatedAt).ToListAsync());
+    public async Task<IActionResult> Index(string? search, int page = 1)
+    {
+        const int pageSize = 10;
+        search = search?.Trim();
+        var query = db.Products.Include(x => x.Category).Where(x => !x.IsDeleted && (string.IsNullOrEmpty(search) || x.Name.Contains(search) || x.Sku.Contains(search))).OrderByDescending(x => x.CreatedAt);
+        var total = await query.CountAsync();
+        ViewBag.Search = search;
+        return View(new PagedResultViewModel<Product> { Items = await query.Skip((Math.Max(page, 1) - 1) * pageSize).Take(pageSize).ToListAsync(), Page = Math.Max(page, 1), PageSize = pageSize, TotalItems = total });
+    }
 
-    [HttpGet]
-    [HasPermission("Product.Create")]
+    [HttpGet, HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Create() { await LoadCategories(); return View(new AdminProductFormViewModel()); }
 
     [HttpPost, ValidateAntiForgeryToken]
-    [HasPermission("Product.Create")]
+    [HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Create(AdminProductFormViewModel model)
     {
         if (!ModelState.IsValid) { await LoadCategories(); return View(model); }
@@ -35,11 +42,12 @@ public class ProductController(ShopDbContext db) : Controller
             Sku = await CreateUniqueSku()
         });
         await db.SaveChangesAsync();
+        TempData["Success"] = "Tạo sản phẩm thành công.";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
-    [HasPermission("Product.Edit")]
+    [HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Edit(int id)
     {
         var product = await db.Products.FindAsync(id);
@@ -49,7 +57,7 @@ public class ProductController(ShopDbContext db) : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    [HasPermission("Product.Edit")]
+    [HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Edit(int id, AdminProductFormViewModel model)
     {
         var product = await db.Products.FindAsync(id);
@@ -64,11 +72,12 @@ public class ProductController(ShopDbContext db) : Controller
         product.IsActive = true;
         product.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+        TempData["Success"] = "Cập nhật sản phẩm thành công.";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    [HasPermission("Product.Edit")]
+    [HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Toggle(int id)
     {
         var product = await db.Products.FindAsync(id);
@@ -76,11 +85,12 @@ public class ProductController(ShopDbContext db) : Controller
         product.IsActive = !product.IsActive;
         product.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+        TempData["Success"] = product.IsActive ? "Đã bật sản phẩm." : "Đã ẩn sản phẩm.";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    [HasPermission("Product.Delete")]
+    [HasPermission(Permissions.ProductManage)]
     public async Task<IActionResult> Delete(int id)
     {
         var product = await db.Products.FindAsync(id);
@@ -89,6 +99,7 @@ public class ProductController(ShopDbContext db) : Controller
         product.IsActive = false;
         product.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+        TempData["Success"] = "Đã xóa sản phẩm.";
         return RedirectToAction(nameof(Index));
     }
 

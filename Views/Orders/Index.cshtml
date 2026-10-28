@@ -1,6 +1,26 @@
 @model IReadOnlyList<ShopMvc.Models.Order>
-@{ ViewData["Title"] = "Đơn hàng của tôi"; }
-<h1>Đơn hàng của tôi</h1>
-<table><thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th></th></tr></thead><tbody>
-@foreach (var order in Model) { <tr><td>@order.Code</td><td>@order.CreatedAt.ToLocalTime()</td><td>@order.TotalAmount.ToString("N0") đ</td><td>@order.Status</td><td><a asp-action="Detail" asp-route-id="@order.Id">Xem chi tiết</a></td></tr> }
-</tbody></table>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    string StatusText(ShopMvc.Models.OrderStatus status) => status switch
+    {
+        ShopMvc.Models.OrderStatus.Pending => "Chờ xử lý",
+        ShopMvc.Models.OrderStatus.Shipping => "Đang giao",
+        ShopMvc.Models.OrderStatus.Completed => "Đã hoàn thành",
+        ShopMvc.Models.OrderStatus.Cancelled => "Đã hủy",
+        _ => status.ToString()
+    };
+}
+<div class="page-heading"><div><p class="eyebrow">LỊCH SỬ MUA HÀNG</p><h1>Đơn hàng của tôi</h1><p class="muted">Theo dõi trạng thái và xem thông tin từng đơn hàng.</p></div></div>
+@if (Model.Count == 0)
+{
+    <div class="empty-state"><h2>Chưa có đơn hàng</h2><p class="muted">Các đơn hàng của bạn sẽ được hiển thị tại đây.</p><a class="button" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a></div>
+}
+else
+{
+    <div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+    @foreach (var order in Model)
+    {
+        <tr><td><strong>@order.Code</strong></td><td>@order.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td><td><strong>@order.TotalAmount.ToString("N0") đ</strong></td><td><span class="badge">@StatusText(order.Status)</span></td><td><div class="product-actions"><a class="button small" asp-action="Detail" asp-route-id="@order.Id">Xem chi tiết</a>@if (order.Status == ShopMvc.Models.OrderStatus.Pending) { <form asp-action="Cancel" asp-route-id="@order.Id" method="post"><button class="button small danger-button" type="submit">Hủy đơn</button></form> }</div></td></tr>
+    }
+    </tbody></table></div>
+}

@@ -1,5 +1,28 @@
 @model ShopMvc.Models.Order
-@{ ViewData["Title"] = "Chi tiết đơn hàng"; }
-<h1>Đơn hàng @Model.Code</h1><p>Trạng thái: @Model.Status</p><p>Người nhận: @Model.ReceiverName - @Model.Phone</p><p>Địa chỉ: @Model.Address</p>
-<ul>@foreach (var item in Model.Items) { <li>@item.ProductName - @item.Quantity x @item.UnitPrice.ToString("N0") đ</li> }</ul>
-@if (Model.Status == ShopMvc.Models.OrderStatus.Pending) { <form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@Model.Id" /><button type="submit">Hủy đơn</button></form> }
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    string StatusText(ShopMvc.Models.OrderStatus status) => status switch
+    {
+        ShopMvc.Models.OrderStatus.Pending => "Chờ xử lý",
+        ShopMvc.Models.OrderStatus.Shipping => "Đang giao",
+        ShopMvc.Models.OrderStatus.Completed => "Đã hoàn thành",
+        ShopMvc.Models.OrderStatus.Cancelled => "Đã hủy",
+        _ => status.ToString()
+    };
+}
+<div class="page-heading"><div><p class="eyebrow">CHI TIẾT ĐƠN HÀNG</p><h1>@Model.Code</h1><p class="muted">Đặt lúc @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p></div><a class="button" asp-action="Index">Quay lại đơn hàng</a></div>
+<section class="detail-card">
+    <div><p class="eyebrow">TRẠNG THÁI</p><h2>@StatusText(Model.Status)</h2><p class="muted">Cập nhật lần cuối: @Model.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p></div>
+    <div class="detail-info"><h2>Thông tin nhận hàng</h2><p><strong>Người nhận:</strong> @Model.ReceiverName</p><p><strong>Số điện thoại:</strong> @Model.Phone</p><p><strong>Địa chỉ:</strong> @Model.Address</p><p><strong>Thanh toán:</strong> @Model.PaymentMethod</p>@if (!string.IsNullOrWhiteSpace(Model.Note)) { <p><strong>Ghi chú:</strong> @Model.Note</p> }</div>
+</section>
+<section class="cart-panel"><div class="panel-heading"><h2>Sản phẩm trong đơn</h2><span>@Model.Items.Sum(x => x.Quantity) sản phẩm</span></div>
+    @foreach (var item in Model.Items)
+    {
+        <div class="cart-line"><div><strong class="cart-name">@item.ProductName</strong><span class="muted">@item.Quantity x @item.UnitPrice.ToString("N0") đ</span></div><span>@((item.Quantity * item.UnitPrice).ToString("N0")) đ</span></div>
+    }
+    <div class="cart-total"><span>Tổng cộng</span><strong>@Model.TotalAmount.ToString("N0") đ</strong></div>
+    @if (Model.Status == ShopMvc.Models.OrderStatus.Pending)
+    {
+        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post"><button class="button danger-button" type="submit">Hủy đơn hàng</button></form>
+    }
+</section>

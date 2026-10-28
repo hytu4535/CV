@@ -11,12 +11,12 @@
     <aside class="admin-sidebar">
         <a class="brand" href="/admin">SHOPMVC <small>ADMIN</small></a>
         <nav>
-            <a href="/admin">Tổng quan</a>
-            @if (await Context.HasPermissionAsync("Product.View")) { <a asp-area="Admin" asp-controller="Product" asp-action="Index">Sản phẩm</a> }
-            @if (await Context.HasPermissionAsync("Category.View")) { <a asp-area="Admin" asp-controller="Category" asp-action="Index">Danh mục</a> }
-            @if (await Context.HasPermissionAsync("Customer.View")) { <a asp-area="Admin" asp-controller="Customer" asp-action="Index">Khách hàng</a> }
-            @if (await Context.HasPermissionAsync("AdminUser.View")) { <a asp-area="Admin" asp-controller="AdminUser" asp-action="Index">Tài khoản admin</a> }
-            @if (await Context.HasPermissionAsync("Role.View")) { <a asp-area="Admin" asp-controller="Role" asp-action="Index">Vai trò & quyền</a> }
+            @if (await Context.HasPermissionAsync(Permissions.DashboardView)) { <a href="/admin">Tổng quan</a> }
+            @if (await Context.HasPermissionAsync(Permissions.ProductView)) { <a asp-area="Admin" asp-controller="Product" asp-action="Index">Sản phẩm</a> }
+            @if (await Context.HasPermissionAsync(Permissions.CategoryView)) { <a asp-area="Admin" asp-controller="Category" asp-action="Index">Danh mục</a> }
+            @if (await Context.HasPermissionAsync(Permissions.UserView)) { <a asp-area="Admin" asp-controller="AdminUser" asp-action="Index">Tài khoản</a> }
+            @if (await Context.HasPermissionAsync(Permissions.RoleView)) { <a asp-area="Admin" asp-controller="Role" asp-action="Index">Vai trò & quyền</a> }
+            @if (await Context.HasPermissionAsync(Permissions.OrderView)) { <a asp-area="Admin" asp-controller="Orders" asp-action="Index">Đơn hàng</a> }
             <a href="/">Xem cửa hàng</a>
             <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post"><button class="nav-button" type="submit">Đăng xuất</button></form>
         </nav>

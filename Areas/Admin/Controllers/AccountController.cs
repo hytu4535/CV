@@ -6,8 +6,8 @@ namespace ShopMvc.Areas.Admin.Controllers;
 [Area("Admin")]
 public class AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager) : Controller
 {
-    [HttpGet("/admin/login")] public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
-    [HttpPost("/admin/login"), ValidateAntiForgeryToken]
+    [HttpGet("/admin/login"), HttpGet("/admin/Account/Login")] public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+    [HttpPost("/admin/login"), HttpPost("/admin/Account/Login"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
@@ -18,5 +18,6 @@ public class AccountController(SignInManager<ApplicationUser> signInManager, Use
         return Url.IsLocalUrl(model.ReturnUrl) && model.ReturnUrl!.StartsWith("/admin", StringComparison.OrdinalIgnoreCase) ? Redirect(model.ReturnUrl) : Redirect("/admin");
     }
     [HttpPost("/admin/logout"), ValidateAntiForgeryToken] public async Task<IActionResult> Logout() { await signInManager.SignOutAsync(); return Redirect("/admin/login"); }
+    [HttpGet("/admin/Account/AccessDenied")]
     public IActionResult AccessDenied() => View();
 }

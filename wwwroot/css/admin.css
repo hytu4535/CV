@@ -64,6 +64,16 @@ body.admin-body {
 }
 
 .inline-form { display: inline; margin-left: 8px; }
+.admin-content .product-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.admin-content .product-actions .inline-form { margin-left: 0; }
+.admin-content .badge { display: inline-block; min-width: 90px; padding: 5px 9px; border-radius: 999px; text-align: center; font-size: .78rem; font-weight: 600; }
+.admin-content .status-pending { background: #fff3cd; color: #856404; }
+.admin-content .status-shipping { background: #dbeafe; color: #1d4ed8; }
+.admin-content .status-completed { background: #dcfce7; color: #166534; }
+.admin-content .status-cancelled { background: #fee2e2; color: #991b1b; }
+.admin-content .status-unknown { background: #e5e7eb; color: #374151; }
+.search-form { display: flex; gap: 10px; align-items: center; margin: 18px 0; }
+.search-form input, .search-form select { min-width: 240px; padding: 10px 12px; border: 1px solid #d7dfd9; border-radius: 7px; background: #fff; }
 .admin-form { max-width: 760px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; }
 .admin-form label { display: block; margin: 14px 0 6px; font-weight: 600; }
 .admin-form input:not([type="checkbox"]), .admin-form select, .admin-form textarea { display: block; width: 100%; padding: 10px 12px; border: 1px solid #d7dfd9; border-radius: 7px; }

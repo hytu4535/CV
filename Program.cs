@@ -21,6 +21,19 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = ".Shop.Identity";
     options.LoginPath = "/account/login";
     options.AccessDeniedPath = "/account/access-denied";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var path = context.Request.Path.StartsWithSegments("/admin") ? "/admin/login" : "/account/login";
+        var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+        context.Response.Redirect($"{path}?returnUrl={Uri.EscapeDataString(returnUrl)}");
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        var path = context.Request.Path.StartsWithSegments("/admin") ? "/admin/Account/AccessDenied" : "/account/AccessDenied";
+        context.Response.Redirect(path);
+        return Task.CompletedTask;
+    };
 });
 builder.Services.AddAuthorization();
 var app = builder.Build();
@@ -40,5 +53,6 @@ app.UseAuthorization();
 app.MapControllerRoute("admin-auth", "admin/login", new { area = "Admin", controller = "Account", action = "Login" });
 app.MapControllerRoute("admin-products", "admin/products/{action=Index}/{id?}", new { area = "Admin", controller = "Product" });
 app.MapControllerRoute("admin", "admin/{controller=Dashboard}/{action=Index}/{id?}", new { area = "Admin" });
+app.MapControllerRoute("account", "{controller=Account}/{action=Login}/{id?}");
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.Run();

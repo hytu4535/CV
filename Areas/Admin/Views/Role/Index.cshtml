@@ -1,4 +1,7 @@
-@model IReadOnlyList<Microsoft.AspNetCore.Identity.IdentityRole>
+@model ShopMvc.ViewModels.PagedResultViewModel<Microsoft.AspNetCore.Identity.IdentityRole>
 @{ ViewData["Title"] = "Phân quyền"; }
 <div class="page-heading"><div><p class="eyebrow">BẢO MẬT</p><h1>Vai trò và quyền</h1></div><a class="button" asp-action="Create">Thêm vai trò</a></div>
-<section class="panel"><div class="table-wrap"><table><thead><tr><th>Vai trò</th><th>Thao tác</th></tr></thead><tbody>@foreach (var item in Model) { <tr><td>@item.Name</td><td><a asp-action="Edit" asp-route-id="@item.Id">Sửa</a>@if (item.Name != "Admin") { <form class="inline-form" asp-action="Delete" method="post"><input type="hidden" name="id" value="@item.Id" /><button class="link-button danger-link" type="submit">Xóa</button></form> }</td></tr> }</tbody></table></div></section>
+@if (TempData["Success"] is string message) { <div class="notice success">@message</div> }
+<form class="search-form" asp-action="Index" method="get"><input name="search" value="@ViewBag.Search" placeholder="Tìm theo tên vai trò..." /><button class="button" type="submit">Tìm kiếm</button></form>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Vai trò</th><th>Thao tác</th></tr></thead><tbody>@foreach (var item in Model.Items) { <tr><td>@item.Name</td><td>@if (item.Name != "Admin") { <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a><form class="inline-form" asp-action="Delete" method="post"><input type="hidden" name="id" value="@item.Id" /><button class="link-button danger-link" type="submit">Xóa</button></form> } else { <span class="muted">Hệ thống</span> }</td></tr> }</tbody></table></div></section>
+@if (Model.TotalPages > 1) { <div class="pagination">@for (var currentPage = 1; currentPage <= Model.TotalPages; currentPage++) { <a class="@(currentPage == Model.Page ? "button small" : "")" asp-action="Index" asp-route-search="@ViewBag.Search" asp-route-page="@currentPage">@currentPage</a> }</div> }
