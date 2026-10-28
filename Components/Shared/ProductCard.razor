@@ -1,0 +1,27 @@
+@using ShopBlazor.Models
+@using ShopBlazor.Services
+@inject CartState Cart
+@inject NavigationManager Navigation
+
+<div class="card h-100 border-0 shadow-sm product-card">
+    <img src="@(Product.ImageUrl ?? "/images/placeholder.svg")" class="card-img-top product-image" alt="@Product.Name" />
+    <div class="card-body d-flex flex-column">
+        <h6><a href="/products/@Product.Id" class="text-decoration-none">@Product.Name</a></h6>
+        <div class="mb-2"><strong>@Product.Price.ToString("N0") ₫</strong>@if (Product.OldPrice > Product.Price){<del class="old-price">@Product.OldPrice?.ToString("N0") ₫</del>}</div>
+        <p class="small text-muted mb-3">@(Product.Stock > 0 ? $"Còn {Product.Stock} sản phẩm" : "Hết hàng")</p>
+        <div class="d-flex gap-2 mt-auto">
+            <a class="btn btn-outline-dark btn-sm flex-fill" href="/products/@Product.Id">Xem chi tiết</a>
+            <button class="btn btn-dark btn-sm flex-fill" disabled="@(Product.Stock <= 0)" @onclick="BuyNow">Mua ngay</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Product Product { get; set; } = default!;
+
+    private void BuyNow()
+    {
+        Cart.Add(Product, 1);
+        Navigation.NavigateTo("/cart");
+    }
+}

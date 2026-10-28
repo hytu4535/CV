@@ -1,0 +1,12 @@
+@page "/products"
+@using Microsoft.EntityFrameworkCore
+@using ShopBlazor.Data
+@using ShopBlazor.Models
+@inject ShopDbContext Db
+
+<PageTitle>Sản phẩm - MyShop</PageTitle>
+<div class="row g-4">
+    <aside class="col-lg-3"><div class="bg-white rounded-3 p-3 shadow-sm"><h6 class="mb-3">Danh mục</h6><div class="list-group list-group-flush"><a class="list-group-item list-group-item-action @(string.IsNullOrEmpty(Category) ? "active" : "")" href="/products">Tất cả</a>@foreach (var category in Categories){<a class="list-group-item list-group-item-action @(Category == category ? "active" : "")" href="/products?category=@Uri.EscapeDataString(category)">@category</a>}</div></div></aside>
+    <section class="col-lg-9"><div class="bg-white rounded-3 p-3 shadow-sm mb-3"><div class="row g-2"><div class="col-md-6"><input class="form-control" @bind="Search" placeholder="Tìm theo tên sản phẩm..." /></div><div class="col-md-4"><select class="form-select" @bind="Sort"><option value="">Mặc định</option><option value="price_asc">Giá tăng dần</option><option value="price_desc">Giá giảm dần</option></select></div><div class="col-md-2"><button class="btn btn-dark w-100" @onclick="LoadProducts">Lọc</button></div></div></div><p class="text-muted">Tìm thấy <strong>@ProductList.Count</strong> sản phẩm</p><div class="row g-3">@foreach (var p in ProductList){<div class="col-6 col-md-4"><ProductCard Product="p" /></div>}</div></section>
+</div>
+@code { [SupplyParameterFromQuery] public string? Category { get; set; } [SupplyParameterFromQuery] public string? Search { get; set; } [SupplyParameterFromQuery] public string? Sort { get; set; } private List<Product> ProductList = new(); private List<string> Categories = new(); protected override async Task OnInitializedAsync(){ Categories = await Db.Products.Include(p=>p.Category).Select(p=>p.Category!.Name).Distinct().OrderBy(x=>x).ToListAsync(); await LoadProducts(); } private async Task LoadProducts(){ var query=Db.Products.Include(p=>p.Category).AsQueryable(); if(!string.IsNullOrWhiteSpace(Category)) query=query.Where(p=>p.Category!.Name==Category); if(!string.IsNullOrWhiteSpace(Search)) query=query.Where(p=>p.Name.Contains(Search)); query=Sort switch { "price_asc"=>query.OrderBy(p=>p.Price), "price_desc"=>query.OrderByDescending(p=>p.Price), _=>query.OrderBy(p=>p.Id) }; ProductList=await query.Take(100).ToListAsync(); } }

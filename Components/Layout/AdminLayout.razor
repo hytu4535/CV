@@ -1,0 +1,20 @@
+@inherits LayoutComponentBase
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <a class="admin-brand" href="/admin/dashboard"><i class="bi bi-shop"></i> MyShop Admin</a>
+        <nav class="admin-nav">
+            <a href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a>
+            <a href="/admin/customers"><i class="bi bi-people"></i> Tài khoản</a>
+            <a href="/admin/categories"><i class="bi bi-tags"></i> Danh mục</a>
+            <a href="/admin/products"><i class="bi bi-box-seam"></i> Sản phẩm</a>
+            <a href="/admin/orders"><i class="bi bi-receipt"></i> Đơn hàng</a>
+            <hr />
+            <a href="/"><i class="bi bi-arrow-left"></i> Về cửa hàng</a>
+            <a href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+        </nav>
+    </aside>
+    <section class="admin-content">
+        @Body
+    </section>
+</div>

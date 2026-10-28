@@ -1,0 +1,13 @@
+@page "/admin/dashboard"
+@layout AdminLayout
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using Microsoft.EntityFrameworkCore
+@using ShopBlazor.Data
+@inject ShopDbContext Db
+@inject NavigationManager Nav
+
+<PageTitle>Quản trị - MyShop</PageTitle>
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h2>Quản trị cửa hàng</h2><p class="text-muted">Tổng quan hệ thống bán hàng</p></div><a class="btn btn-outline-dark" href="/auth/logout">Đăng xuất</a></div>
+<div class="row g-3 mb-4"><div class="col-md-3"><div class="admin-stat"><i class="bi bi-box-seam"></i><span>Sản phẩm</span><strong>@ProductCount</strong></div></div><div class="col-md-3"><div class="admin-stat"><i class="bi bi-people"></i><span>Khách hàng</span><strong>@CustomerCount</strong></div></div><div class="col-md-3"><div class="admin-stat"><i class="bi bi-receipt"></i><span>Đơn hàng</span><strong>@OrderCount</strong></div></div><div class="col-md-3"><div class="admin-stat"><i class="bi bi-tags"></i><span>Danh mục</span><strong>@CategoryCount</strong></div></div></div>
+<div class="bg-white rounded-3 shadow-sm p-4"><h5>Quản lý nhanh</h5><div class="d-flex gap-2 flex-wrap"><a class="btn btn-dark" href="/admin/products">Sản phẩm</a><a class="btn btn-outline-dark" href="/admin/categories">Danh mục</a><a class="btn btn-outline-dark" href="/admin/customers">Khách hàng</a><a class="btn btn-outline-dark" href="/admin/orders">Đơn hàng</a><a class="btn btn-outline-dark" href="/">Xem cửa hàng</a></div></div>
+@code { private int ProductCount, CustomerCount, OrderCount, CategoryCount; protected override async Task OnInitializedAsync(){ProductCount=await Db.Products.CountAsync();CustomerCount=await Db.Customers.CountAsync();OrderCount=await Db.Orders.CountAsync();CategoryCount=await Db.Categories.CountAsync();} }

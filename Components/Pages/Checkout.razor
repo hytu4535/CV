@@ -1,0 +1,109 @@
+@page "/checkout"
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ShopBlazor.Data
+@using ShopBlazor.Models
+@using ShopBlazor.Services
+@inject ShopDbContext Db
+@inject CartState Cart
+@inject NavigationManager Nav
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthState
+
+<PageTitle>Thanh toán - MyShop</PageTitle>
+
+@if (Cart.Items.Count == 0)
+{
+    <div class="alert alert-warning">Giỏ hàng đang trống. <a href="/products">Xem sản phẩm</a></div>
+}
+else
+{
+    <h3 class="mb-4">Thông tin thanh toán</h3>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <EditForm Model="Model" FormName="checkout" OnValidSubmit="Submit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                @if (!string.IsNullOrEmpty(Error))
+                {
+                    <div class="alert alert-danger">@Error</div>
+                }
+                <div class="bg-white rounded-3 shadow-sm p-4">
+                    <div class="mb-3"><label class="form-label">Họ tên</label><InputText class="form-control" @bind-Value="Model.FullName" /><ValidationMessage For="()=>Model.FullName" /></div>
+                    <div class="mb-3"><label class="form-label">Email</label><InputText class="form-control" type="email" @bind-Value="Model.Email" /><ValidationMessage For="()=>Model.Email" /></div>
+                    <div class="mb-3"><label class="form-label">Số điện thoại</label><InputText class="form-control" @bind-Value="Model.Phone" /><ValidationMessage For="()=>Model.Phone" /></div>
+                    <div class="mb-3"><label class="form-label">Địa chỉ</label><InputText class="form-control" @bind-Value="Model.Address" /><ValidationMessage For="()=>Model.Address" /></div>
+                    <div class="mb-3"><label class="form-label">Ghi chú</label><InputTextArea class="form-control" @bind-Value="Model.Note" /></div>
+                    <button class="btn btn-dark btn-lg" type="submit">Đặt hàng</button>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col-lg-5"><div class="bg-white rounded-3 shadow-sm p-4"><h5>Đơn hàng</h5>@foreach (var item in Cart.Items){<div class="d-flex justify-content-between small mb-2"><span>@item.Product.Name × @item.Quantity</span><span>@item.Total.ToString("N0") ₫</span></div>}<hr /><div class="d-flex justify-content-between fw-bold"><span>Tổng cộng</span><span>@Cart.GrandTotal.ToString("N0") ₫</span></div></div></div>
+    </div>
+}
+
+@code {
+    private CheckoutModel Model = new();
+    private string? Error;
+
+    private async Task Submit()
+    {
+        Error = null;
+        foreach (var item in Cart.Items)
+        {
+            var product = await Db.Products.FindAsync(item.Product.Id);
+            if (product is null) { Error = $"Sản phẩm '{item.Product.Name}' không còn tồn tại."; return; }
+            if (item.Quantity <= 0 || item.Quantity > product.Stock) { Error = $"Sản phẩm '{product.Name}' chỉ còn {product.Stock} sản phẩm trong kho."; return; }
+        }
+
+        await using var transaction = await Db.Database.BeginTransactionAsync();
+        var state = await AuthState.GetAuthenticationStateAsync();
+        var claimId = state.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Customer? customer = null;
+        if (int.TryParse(claimId, out var customerId)) customer = await Db.Customers.FindAsync(customerId);
+        customer ??= await Db.Customers.FirstOrDefaultAsync(c => c.Email == Model.Email);
+        if (customer is null)
+        {
+            customer = new Customer { FullName = Model.FullName, Email = Model.Email, Phone = Model.Phone, Address = Model.Address };
+            Db.Customers.Add(customer);
+            await Db.SaveChangesAsync();
+        }
+        else
+        {
+            customer.FullName = Model.FullName;
+            customer.Email = Model.Email;
+            customer.Phone = Model.Phone;
+            customer.Address = Model.Address;
+        }
+
+        var order = new Order { CustomerId = customer.Id, TotalAmount = Cart.GrandTotal, Note = Model.Note, Details = new List<OrderDetail>() };
+        foreach (var item in Cart.Items)
+        {
+            var product = await Db.Products.FindAsync(item.Product.Id);
+            if (product is null || item.Quantity > product.Stock) { Error = "Tồn kho đã thay đổi, vui lòng thử lại."; await transaction.RollbackAsync(); return; }
+            order.Details!.Add(new OrderDetail { ProductId = product.Id, Quantity = item.Quantity, UnitPrice = product.Price });
+            product.Stock -= item.Quantity;
+        }
+        Db.Orders.Add(order);
+        await Db.SaveChangesAsync();
+        await transaction.CommitAsync();
+        Cart.Items.Clear();
+        Nav.NavigateTo("/order-success");
+    }
+
+    private sealed class CheckoutModel
+    {
+        [Required(ErrorMessage="Vui lòng nhập họ tên.")]
+        [RegularExpression(@"^[a-zA-ZÀ-ỹ\s]{2,100}$", ErrorMessage="Họ tên không hợp lệ.")]
+        public string FullName { get; set; } = string.Empty;
+        [Required(ErrorMessage="Vui lòng nhập email.")]
+        [EmailAddress(ErrorMessage="Email không đúng định dạng.")]
+        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage="Vui lòng nhập số điện thoại.")]
+        [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage="Số điện thoại Việt Nam không hợp lệ.")]
+        public string Phone { get; set; } = string.Empty;
+        [Required(ErrorMessage="Vui lòng nhập địa chỉ.")]
+        public string Address { get; set; } = string.Empty;
+        public string? Note { get; set; }
+    }
+}

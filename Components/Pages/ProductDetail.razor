@@ -1,0 +1,11 @@
+@page "/products/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@using ShopBlazor.Data
+@using ShopBlazor.Models
+@using ShopBlazor.Services
+@inject ShopDbContext Db
+@inject CartState Cart
+@inject NavigationManager Nav
+
+@if (Product is not { } product){<div class="alert alert-warning">Không tìm thấy sản phẩm.</div>}else{<div class="bg-white rounded-3 shadow-sm p-4"><div class="row g-4"><div class="col-md-5"><img src="@(product.ImageUrl ?? "/images/placeholder.svg")" class="img-fluid rounded-3 w-100 product-image" alt="@product.Name" /></div><div class="col-md-7"><h2>@product.Name</h2><div class="mb-3 fs-3">@product.Price.ToString("N0") ₫ @if(product.OldPrice>product.Price){<del class="old-price fs-6">@product.OldPrice?.ToString("N0") ₫</del>}</div><p class="text-muted">@product.Description</p><p class="text-success">@(product.Stock > 0 ? $"Còn {product.Stock} sản phẩm" : "Sản phẩm đã hết hàng")</p><div class="d-flex gap-2 mb-4 align-items-center"><label class="fw-semibold">Số lượng</label><input class="form-control" style="max-width:100px" type="number" min="1" max="@product.Stock" @bind="Quantity" /></div><button class="btn btn-outline-dark btn-lg me-2" disabled="@(product.Stock <= 0)" @onclick="AddToCart"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</button><button class="btn btn-dark btn-lg" disabled="@(product.Stock <= 0)" @onclick="BuyNow">Mua ngay</button></div></div></div>}
+@code { [Parameter] public int Id { get; set; } private Product? Product; private int Quantity=1; protected override async Task OnParametersSetAsync(){ Product=await Db.Products.Include(p=>p.Category).FirstOrDefaultAsync(p=>p.Id==Id); } private void AddToCart(){ if(Product is not null){ Cart.Add(Product, Math.Max(1,Quantity)); Nav.NavigateTo("/cart"); } } private void BuyNow(){ if(Product is not null){ Cart.Add(Product, Math.Max(1,Quantity)); Nav.NavigateTo("/cart"); } } }

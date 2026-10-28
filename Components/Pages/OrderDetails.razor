@@ -1,0 +1,12 @@
+@page "/orders/{Id:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "User")]
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using ShopBlazor.Data
+@using ShopBlazor.Models
+@inject ShopDbContext Db
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthState
+
+<PageTitle>Chi tiết đơn hàng - MyShop</PageTitle>
+@if (Order is null){<div class="alert alert-warning">Không tìm thấy đơn hàng.</div>}else{<div class="d-flex justify-content-between align-items-center mb-3"><h2>Chi tiết đơn hàng #@Order.Id</h2><a class="btn btn-outline-dark" href="/orders">Quay lại</a></div><div class="bg-white rounded-3 shadow-sm p-4"><div class="row mb-3"><div class="col-md-4"><strong>Ngày đặt:</strong> @Order.OrderDate.ToString("dd/MM/yyyy HH:mm")</div><div class="col-md-4"><strong>Trạng thái:</strong> @Order.StatusVietnamese</div><div class="col-md-4"><strong>Tổng tiền:</strong> @Order.TotalAmount.ToString("N0") ₫</div></div><table class="table align-middle"><thead><tr><th>Sản phẩm</th><th>Đơn giá</th><th>Số lượng</th><th>Thành tiền</th></tr></thead><tbody>@foreach(var detail in Order.Details ?? []){<tr><td>@detail.Product?.Name</td><td>@detail.UnitPrice.ToString("N0") ₫</td><td>@detail.Quantity</td><td>@((detail.UnitPrice * detail.Quantity).ToString("N0")) ₫</td></tr>}</tbody></table>@if(Order.Status==OrderStatus.Pending){<button class="btn btn-outline-danger" @onclick="Cancel">Hủy đơn</button>}</div>}
+@code { [Parameter] public int Id { get; set; } private Order? Order; protected override async Task OnParametersSetAsync(){var state=await AuthState.GetAuthenticationStateAsync();if(!int.TryParse(state.User.FindFirstValue(ClaimTypes.NameIdentifier),out var customerId))return;Order=await Db.Orders.Include(x=>x.Details!).ThenInclude(x=>x.Product).FirstOrDefaultAsync(x=>x.Id==Id&&x.CustomerId==customerId);} private async Task Cancel(){if(Order is null||Order.Status!=OrderStatus.Pending)return;await using var transaction=await Db.Database.BeginTransactionAsync();var order=await Db.Orders.Include(x=>x.Details!).FirstOrDefaultAsync(x=>x.Id==Id&&x.CustomerId==Order.CustomerId);if(order is null||order.Status!=OrderStatus.Pending)return;foreach(var detail in order.Details??[]){var product=await Db.Products.FindAsync(detail.ProductId);if(product is not null)product.Stock+=detail.Quantity;}order.Status=OrderStatus.Cancelled;await Db.SaveChangesAsync();await transaction.CommitAsync();Order=await Db.Orders.Include(x=>x.Details!).ThenInclude(x=>x.Product).FirstAsync(x=>x.Id==Id);}}
