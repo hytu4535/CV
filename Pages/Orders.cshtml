@@ -1,0 +1,79 @@
+@page
+@model ShopUI.Pages.OrdersModel
+@using System.Globalization
+@using ShopUI.Models
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    var vn = new CultureInfo("vi-VN");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h2 class="mb-1">Đơn hàng của tôi</h2><p class="text-muted mb-0">Theo dõi các đơn hàng bạn đã đặt.</p></div>
+    <a asp-page="/Products/Index" class="btn btn-outline-dark"><i class="bi bi-bag me-1"></i>Tiếp tục mua sắm</a>
+</div>
+
+@if (TempData["OrderMsg"] != null)
+{
+    <div class="alert alert-success">@TempData["OrderMsg"]</div>
+}
+@if (TempData["OrderError"] != null)
+{
+    <div class="alert alert-warning">@TempData["OrderError"]</div>
+}
+
+@if (!Model.Orders.Any())
+{
+    <div class="bg-white rounded-3 shadow-sm text-center py-5">
+        <i class="bi bi-receipt text-muted display-4"></i>
+        <h5 class="mt-3">Bạn chưa có đơn hàng nào</h5>
+        <p class="text-muted">Hãy chọn sản phẩm yêu thích và đặt hàng ngay.</p>
+        <a asp-page="/Products/Index" class="btn btn-primary">Xem sản phẩm</a>
+    </div>
+}
+else
+{
+    <div class="d-grid gap-4">
+    @foreach (var order in Model.Orders)
+    {
+        var badgeClass = order.Status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Shipping => "bg-info text-white",
+            OrderStatus.Completed => "bg-success text-white",
+            OrderStatus.Cancelled => "bg-danger text-white",
+            _ => "bg-secondary"
+        };
+        <div class="bg-white rounded-3 shadow-sm p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-3 gap-2">
+                <div><strong>Đơn hàng #DH@order.Id.ToString("D4")</strong><div class="small text-muted">Đặt ngày @order.OrderDate.ToString("dd/MM/yyyy HH:mm")</div></div>
+                <div class="text-end"><span class="badge @badgeClass">@order.StatusVietnamese</span><div class="price fw-bold mt-1">@order.TotalAmount.ToString("N0", vn) ₫</div></div>
+            </div>
+            @if (order.Details != null)
+            {
+                foreach (var detail in order.Details)
+                {
+                    <div class="d-flex align-items-center gap-3 py-2">
+                        <img src="@(string.IsNullOrWhiteSpace(detail.Product?.ImageUrl) ? "/images/product-placeholder.svg" : detail.Product.ImageUrl)" width="56" height="56" class="rounded object-fit-cover" alt="@detail.Product?.Name" />
+                        <div class="flex-grow-1"><div>@detail.Product?.Name</div><small class="text-muted">Số lượng: @detail.Quantity</small></div>
+                        <span>@((detail.UnitPrice * detail.Quantity).ToString("N0", vn)) ₫</span>
+                    </div>
+                }
+            }
+            <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-2">
+                <a asp-page="/Orders/Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye me-1"></i>Xem chi tiết đơn hàng
+                </a>
+                @if (order.Status == OrderStatus.Pending)
+                {
+                    <form method="post" asp-page-handler="Cancel" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                        <input type="hidden" name="id" value="@order.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-x-circle me-1"></i>Hủy đơn
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+    </div>
+}

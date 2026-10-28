@@ -28,6 +28,27 @@
     --shadow: 0 8px 24px rgba(232,130,158,.15);
 }
 
+.auth-shell {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+.auth-card {
+    width: 100%;
+    max-width: 430px;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+}
+.auth-icon {
+    color: var(--pink-500);
+    font-size: 3rem;
+}
+
 /* Typography */
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap');
 

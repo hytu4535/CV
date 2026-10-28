@@ -43,7 +43,7 @@ namespace ShopUI.Pages.Admin.Products
             public int? Stock { get; set; }
 
             [StringLength(500)]
-            [RegularExpression(@"^(https?:\/\/.+\.(jpg|jpeg|png|webp|gif).*)?$", ErrorMessage = "URL hình ảnh không hợp lệ")]
+            [RegularExpression(@"^(\/images\/[A-Za-z0-9._\-/]+\.(jpg|jpeg|png|webp|gif|svg)|https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?)$", ErrorMessage = "URL hình ảnh không hợp lệ")]
             public string? ImageUrl { get; set; }
 
             [Required(ErrorMessage = "Mô tả không được để trống.")]

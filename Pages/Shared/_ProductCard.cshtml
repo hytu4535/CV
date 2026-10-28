@@ -8,7 +8,7 @@
         <span class="badge-sale">-@discountPercent%</span>
     }
     <a asp-page="/Products/Detail" asp-route-id="@Model.Id">
-        <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" />
+        <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/product-placeholder.svg" : Model.ImageUrl)" class="card-img-top" alt="@Model.Name" />
     </a>
     <div class="card-body d-flex flex-column">
         <small class="text-muted">@Model.Category.Name</small>
@@ -24,8 +24,8 @@
             <form method="post" asp-page-handler="AddToCart" asp-page="/Cart">
                 <input type="hidden" name="productId" value="@Model.Id" />
                 <input type="hidden" name="quantity" value="1" />
-                <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">
-                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                <button type="submit" class="btn btn-primary btn-sm w-100 mt-2" disabled="@(Model.Stock <= 0 ? "disabled" : null)">
+                    <i class="bi bi-cart-plus"></i> @(Model.Stock <= 0 ? "Hết hàng" : "Thêm vào giỏ")
                 </button>
 </form>
         </div>

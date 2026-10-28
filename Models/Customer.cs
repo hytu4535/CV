@@ -21,5 +21,8 @@ namespace ShopUI.Models
 
         [MaxLength(255)]
         public string? Address { get; set; }
+
+        [MaxLength(255)]
+        public string? PasswordHash { get; set; }
     }
 }

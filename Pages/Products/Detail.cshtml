@@ -42,6 +42,14 @@
             </div>
 
             <p class="text-muted">@Model.Product.Description</p>
+            @if (Model.Product.Stock > 0)
+            {
+                <div class="small text-success mb-3"><i class="bi bi-check-circle me-1"></i>Còn @Model.Product.Stock sản phẩm</div>
+            }
+            else
+            {
+                <div class="alert alert-warning py-2 mb-3"><i class="bi bi-exclamation-circle me-1"></i>Sản phẩm đã hết hàng.</div>
+            }
 
             <div class="mb-3">
                 <label class="form-label fw-semibold">Kích cỡ</label><br />
@@ -60,12 +68,12 @@
             <form method="post" asp-page-handler="AddToCart" asp-page="/Cart">
                 <div class="d-flex align-items-center gap-2 mb-4">
                     <label class="fw-semibold">Số lượng</label>
-                    <input type="number" class="form-control qty-input" name="quantity" value="1" min="1" />
+                    <input type="number" class="form-control qty-input" name="quantity" value="1" min="1" max="@Model.Product.Stock" @(Model.Product.Stock <= 0 ? "disabled" : "") />
                     <input type="hidden" name="productId" value="@Model.Product.Id" />
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg me-2"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</button>
+                <button type="submit" class="btn btn-primary btn-lg me-2" disabled="@(Model.Product.Stock <= 0 ? "disabled" : null)"><i class="bi bi-cart-plus"></i> @(Model.Product.Stock <= 0 ? "Hết hàng" : "Thêm vào giỏ")</button>
             </form>
-            <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg">Mua ngay</a>
+            <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg @(Model.Product.Stock <= 0 ? "disabled" : "")">Mua ngay</a>
 
             <ul class="list-unstyled mt-4 small text-muted">
                 <li><i class="bi bi-truck"></i> Giao hàng toàn quốc 2–4 ngày</li>

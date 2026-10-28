@@ -1,0 +1,96 @@
+@page
+@model ShopUI.Pages.Admin.Categories.IndexModel
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    ViewData["ActivePage"] = "Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Quản lý danh mục</h2>
+        <p class="text-muted mb-0">Tạo và sắp xếp danh mục sản phẩm.</p>
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">@Model.Categories.Count danh mục</span>
+</div>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning">@TempData["Error"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="stat-card h-100">
+            <h5 class="mb-3">Thêm danh mục</h5>
+            <form method="post" asp-page-handler="Create" novalidate>
+                <label asp-for="Input.Name" class="form-label">Tên danh mục</label>
+                <input asp-for="Input.Name" class="form-control" placeholder="Ví dụ: Phụ kiện" />
+                <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                <button type="submit" class="btn btn-primary mt-3 w-100"><i class="bi bi-plus-lg me-1"></i>Thêm danh mục</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="bg-white rounded-3 shadow-sm p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Danh sách danh mục</h5>
+                <span class="text-muted small">Sắp xếp theo tên</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-admin align-middle mb-0">
+                    <thead><tr><th>#</th><th>Tên danh mục</th><th class="text-end">Thao tác</th></tr></thead>
+                    <tbody>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr>
+                            <td>@category.Id</td>
+                            <td class="fw-semibold">@category.Name</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategory-@category.Id"><i class="bi bi-pencil"></i></button>
+                                <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?');">
+                                    <input type="hidden" name="id" value="@category.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Categories.Any())
+                    {
+                        <tr><td colspan="3" class="text-center text-muted py-4">Chưa có danh mục.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @foreach (var category in Model.Categories)
+                {
+                    <div class="modal fade" id="editCategory-@category.Id" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <form method="post" asp-page-handler="Edit" novalidate>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Sửa danh mục</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="EditId" value="@category.Id" />
+                                        <label class="form-label" for="category-name-@category.Id">Tên danh mục</label>
+                                        <input id="category-name-@category.Id" name="EditInput.Name" value="@category.Name" class="form-control" maxlength="100" required />
+                                        <div class="form-text">Từ 2 đến 100 ký tự, không chứa ký tự đặc biệt.</div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Lưu thay đổi</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -37,7 +37,7 @@
                 <h5 class="mb-0">Thông tin đơn hàng</h5>
             </div>
             <div class="card-body">
-                <p><strong>Mã đơn:</strong> #DH@Model.Order.Id.ToString("D4")</p>
+                <p><strong>Mã đơn:</strong> @($"#DH{Model.Order.Id:D4}")</p>
                 <p><strong>Ngày đặt:</strong> @Model.Order.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
                 <p><strong>Trạng thái hiện tại:</strong>
                     @{
@@ -110,12 +110,18 @@
                 <div class="mb-3">
                     <label class="form-label">Trạng thái mới <span class="text-danger">*</span></label>
                     <select class="form-select" asp-for="NewStatus">
-                        <option value="Pending">Chờ xử lý</option>
-                        <option value="Shipping">Đang giao</option>
-                        <option value="Completed">Hoàn thành</option>
-                        <option value="Cancelled">Đã hủy</option>
+                        @foreach (var status in Model.ValidStatusTransitions)
+                        {
+                            <option value="@status">@Model.GetVietnameseStatus((OrderStatus)status)</option>
+                        }
                     </select>
                     <span class="text-danger small" asp-validation-for="NewStatus"></span>
+                    @if (!Model.ValidStatusTransitions.Any())
+                    {
+                        <div class="alert alert-warning mt-2">
+                            @Model.GetTransitionNotAllowedMessage()
+                        </div>
+                    }
                 </div>
                 <button type="submit" class="btn btn-primary me-2">
                     <i class="bi bi-check-lg"></i> Cập nhật

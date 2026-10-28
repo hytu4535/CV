@@ -1,0 +1,2 @@
+sửa lỗi:
+lỗi: trang http://localhost:5000/Cart chỉnh số lượng là 9 nhưng khi mua chỉ có 1 ở đơn hàng, tồn kho cũng trừ 1 thôi, bỏ cái nút tick số lượng đi, phải cập nhật số lượng ngay khi tôi tăng/giảm số lượng sản phẩm chứ

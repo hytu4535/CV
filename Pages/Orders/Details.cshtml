@@ -1,0 +1,55 @@
+@page "{id:int}"
+@model ShopUI.Pages.Orders.DetailsModel
+@using System.Globalization
+@using ShopUI.Models
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    var vn = new CultureInfo("vi-VN");
+    var badgeClass = Model.Order.Status switch
+    {
+        OrderStatus.Pending => "bg-warning text-dark",
+        OrderStatus.Shipping => "bg-info text-white",
+        OrderStatus.Completed => "bg-success text-white",
+        OrderStatus.Cancelled => "bg-danger text-white",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Chi tiết đơn hàng #DH@Model.Order.Id.ToString("D4")</h2>
+        <p class="text-muted mb-0">Đặt ngày @Model.Order.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+    </div>
+    <a asp-page="/Orders" class="btn btn-outline-secondary">← Danh sách đơn hàng</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="bg-white rounded-3 shadow-sm p-4">
+            <h5 class="mb-3">Sản phẩm trong đơn</h5>
+            @foreach (var detail in Model.Order.Details ?? Enumerable.Empty<OrderDetail>())
+            {
+                <div class="d-flex align-items-center gap-3 py-3 border-bottom">
+                    <img src="@(string.IsNullOrWhiteSpace(detail.Product?.ImageUrl) ? "/images/product-placeholder.svg" : detail.Product.ImageUrl)" width="64" height="64" class="rounded object-fit-cover" alt="@detail.Product?.Name" />
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">@detail.Product?.Name</div>
+                        <small class="text-muted">@detail.Quantity x @detail.UnitPrice.ToString("N0", vn) ₫</small>
+                    </div>
+                    <span class="fw-semibold">@((detail.UnitPrice * detail.Quantity).ToString("N0", vn)) ₫</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between fs-5 fw-bold mt-4">
+                <span>Tổng cộng</span>
+                <span class="price">@Model.Order.TotalAmount.ToString("N0", vn) ₫</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="bg-white rounded-3 shadow-sm p-4">
+            <h5 class="mb-3">Thông tin đơn hàng</h5>
+            <p><strong>Trạng thái:</strong> <span class="badge @badgeClass">@Model.Order.StatusVietnamese</span></p>
+            <p><strong>Thanh toán:</strong> @Model.Order.PaymentMethod</p>
+            <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Order.Customer?.Address, @Model.Order.District, @Model.Order.Province</p>
+        </div>
+    </div>
+</div>

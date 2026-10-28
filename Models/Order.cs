@@ -32,6 +32,18 @@ namespace ShopUI.Models
         [Required]
         public decimal TotalAmount { get; set; }
 
+        [MaxLength(30)]
+        public string PaymentMethod { get; set; } = "cod";
+
+        [MaxLength(100)]
+        public string? Province { get; set; }
+
+        [MaxLength(100)]
+        public string? District { get; set; }
+
+        [MaxLength(500)]
+        public string? Note { get; set; }
+
         public string StatusVietnamese => Status switch
         {
             OrderStatus.Pending => "Chờ xử lý",

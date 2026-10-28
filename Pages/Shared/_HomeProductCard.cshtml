@@ -9,7 +9,7 @@
             <span class="badge-sale">-@discountPercent%</span>
         }
         <a asp-page="/Products/Detail" asp-route-id="@Model.Id">
-            <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" />
+            <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/product-placeholder.svg" : Model.ImageUrl)" class="card-img-top" alt="@Model.Name" />
         </a>
         <div class="card-body d-flex flex-column">
             <small class="text-muted">@Model.Category.Name</small>
@@ -30,8 +30,8 @@
                 <form method="post" asp-page-handler="AddToCart" asp-page="/Cart">
                     <input type="hidden" name="productId" value="@Model.Id" />
                     <input type="hidden" name="quantity" value="1" />
-                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                        <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                    <button type="submit" class="btn btn-primary btn-sm flex-fill" disabled="@(Model.Stock <= 0 ? "disabled" : null)">
+                        <i class="bi bi-cart-plus"></i> @(Model.Stock <= 0 ? "Hết hàng" : "Thêm vào giỏ")
                     </button>
                 </form>
             </div>
@@ -49,7 +49,7 @@
                 <div class="modal-body">
                     <div class="row g-4">
                         <div class="col-md-5">
-                            <img src="@Model.ImageUrl" class="img-fluid rounded-3" alt="@Model.Name" />
+                            <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/product-placeholder.svg" : Model.ImageUrl)" class="img-fluid rounded-3" alt="@Model.Name" />
                         </div>
                         <div class="col-md-7">
                             <div class="mb-3">
@@ -83,8 +83,8 @@
                             </div>
 
                             <div class="d-flex gap-2">
-                                <a asp-page="/Cart" class="btn btn-primary btn-lg flex-fill"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</a>
-                                <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg flex-fill">Mua ngay</a>
+                                <button type="button" class="btn btn-primary btn-lg flex-fill" disabled="@(Model.Stock <= 0 ? "disabled" : null)"><i class="bi bi-cart-plus"></i> @(Model.Stock <= 0 ? "Hết hàng" : "Thêm vào giỏ")</button>
+                                <a asp-page="/Checkout" class="btn btn-outline-dark btn-lg flex-fill @(Model.Stock <= 0 ? "disabled" : "")">Mua ngay</a>
                             </div>
                         </div>
                     </div>

@@ -8,6 +8,31 @@
 
 <h3 class="mb-4">Giỏ hàng của bạn</h3>
 
+@if (TempData["CartError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["CartError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["CartMsg"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["CartMsg"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Items.Any())
+{
+    <div class="bg-white rounded-3 shadow-sm text-center py-5">
+        <i class="bi bi-cart-x display-4 text-muted"></i>
+        <h5 class="mt-3">Giỏ hàng đang trống</h5>
+        <a asp-page="/Products/Index" class="btn btn-primary mt-2">Xem sản phẩm</a>
+    </div>
+}
+else
+{
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white rounded-3 shadow-sm p-3 table-responsive">
@@ -33,9 +58,21 @@
                                 </div>
                             </td>
                             <td>@(item.Product.Price.ToString("N0", vn)) ₫</td>
-                            <td><input type="number" class="form-control form-control-sm qty-input" value="@item.Quantity" min="1" /></td>
+                            <td>
+                                <form method="post" asp-page-handler="UpdateQuantity">
+                                    <input type="hidden" name="productId" value="@item.Product.Id" />
+                                    <input type="number" name="quantity" class="form-control form-control-sm qty-input" value="@item.Quantity" min="1" max="@item.Product.Stock" onchange="this.form.submit()" aria-label="Số lượng @item.Product.Name" />
+                                </form>
+                            </td>
                             <td class="price">@((item.Product.Price * item.Quantity).ToString("N0", vn)) ₫</td>
-                            <td><button class="btn btn-sm btn-outline-dark"><i class="bi bi-trash"></i></button></td>
+                            <td>
+                                <form method="post" asp-page-handler="RemoveFromCart">
+                                    <input type="hidden" name="productId" value="@item.Product.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa khỏi giỏ hàng">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -68,3 +105,4 @@
         </div>
     </div>
 </div>
+}

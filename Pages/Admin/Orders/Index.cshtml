@@ -10,12 +10,25 @@
     <i class="bi bi-arrow-left"></i> Quay lại
 </a>
 
-<!-- Search -->
-<form method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên khách hàng hoặc mã đơn..." />
-        <button class="btn btn-outline-secondary" type="submit">Tìm</button>
-        <a asp-page="./Index" class="btn btn-outline-danger ms-2">Reset</a>
+<!-- Search and Filter -->
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="input-group">
+            <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên khách hàng hoặc mã đơn..." />
+            <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="input-group">
+            <input type="date" name="StartDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" placeholder="Từ ngày" />
+            <input type="date" name="EndDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" placeholder="Đến ngày" />
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-secondary" type="submit">Lọc</button>
+            <a asp-page="./Index" class="btn btn-outline-danger">Reset</a>
+        </div>
     </div>
 </form>
 
@@ -23,45 +36,55 @@
 <div class="mb-4">
     <nav>
         <div class="nav nav-tabs" id="orderStatusTab" role="tablist">
-            <button class="nav-link @((string.IsNullOrEmpty(Model.StatusFilter) ? "active" : ""))"
+            <button class="nav-link @((string.IsNullOrEmpty(Model.status) || Model.status.ToLower() == "all" || Model.status.ToLower() == "tất cả") ? "active" : "")"
                     id="tab-all" data-bs-toggle="tab" data-bs-target="#tab-all-content" type="button" role="tab"
-                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-StatusFilter="">
-                Todas (@Model.StatusCounts.GetValueOrDefault(OrderStatus.Pending,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Shipping,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Completed,0) + @Model.StatusCounts.GetValueOrDefault(OrderStatus.Cancelled,0))
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="all">
+                Tất cả @Model.TotalOrders
             </button>
-            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
-            {
-                var statusName = status.ToString();
-                var count = Model.StatusCounts.GetValueOrDefault(status, 0);
-                <button class="nav-link @(Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                        id="tab-@statusName" data-bs-toggle="tab" data-bs-target="#tab-@statusName-content" type="button" role="tab"
-                        asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-StatusFilter="@statusName">
-                    @statusName (@count)
-                </button>
-            }
+            <button class="nav-link @(Model.status.ToLower() == "pending" || Model.status.ToLower() == "chờ xử lý") ? "active" : "")"
+                    id="tab-pending" data-bs-toggle="tab" data-bs-target="#tab-pending-content" type="button" role="tab"
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="chờ xử lý">
+                Chờ xử lý @Model.PendingCount
+            </button>
+            <button class="nav-link @(Model.status.ToLower() == "shipping" || Model.status.ToLower() == "đang giao") ? "active" : "")"
+                    id="tab-shipping" data-bs-toggle="tab" data-bs-target="#tab-shipping-content" type="button" role="tab"
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="đang giao">
+                Đang giao @Model.ShippingCount
+            </button>
+            <button class="nav-link @(Model.status.ToLower() == "completed" || Model.status.ToLower() == "hoàn thành") ? "active" : "")"
+                    id="tab-completed" data-bs-toggle="tab" data-bs-target="#tab-completed-content" type="button" role="tab"
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="hoàn thành">
+                Hoàn thành @Model.CompletedCount
+            </button>
+            <button class="nav-link @(Model.status.ToLower() == "cancelled" || Model.status.ToLower() == "đã hủy") ? "active" : "")"
+                    id="tab-cancelled" data-bs-toggle="tab" data-bs-target="#tab-cancelled-content" type="button" role="tab"
+                    asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="đã hủy">
+                Đã hủy @Model.CancelledCount
+            </button>
         </div>
     </nav>
     <div class="tab-content mt-3" id="orderStatusTabContent">
         <!-- All tab -->
-        <div class="tab-pane fade @((string.IsNullOrEmpty(Model.StatusFilter) ? "show active" : ""))" id="tab-all-content" role="tabpanel" aria-labelledby="tab-all">
-            @if (Model.StatusFilter == "")
-            {
-                <div class="table-responsive">
-                    <table class="table table-admin">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Khách hàng</th>
-                                <th>Ngày</th>
-                                <th class="text-end">Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
+        <div class="tab-pane fade @((string.IsNullOrEmpty(Model.status) || Model.status.ToLower() == "all" || Model.status.ToLower() == "tất cả") ? "show active" : "")" id="tab-all-content" role="tabpanel" aria-labelledby="tab-all">
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>Mã DH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders.Any())
+                        {
                             @foreach (var order in Model.Orders)
                             {
                                 <tr>
-                                    <td>#DH@order.Id.ToString("D4")</td>
+                                    <td>@($"#DH{order.Id:D4}")</td>
                                     <td>@order.Customer.FullName</td>
                                     <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
@@ -87,67 +110,285 @@
                                     </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
-            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- Individual status tabs -->
-        @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
-        {
-            var statusName = status.ToString();
-            var count = Model.StatusCounts.GetValueOrDefault(status, 0);
-            <div class="tab-pane fade @(Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase) ? "show active" : "")" id="tab-@statusName-content" role="tabpanel" aria-labelledby="tab-@statusName">
-                @if (Model.StatusFilter.Equals(statusName, StringComparison.OrdinalIgnoreCase))
-                {
-                    <div class="table-responsive">
-                        <table class="table table-admin">
-                            <thead>
+        <!-- Pending tab -->
+        <div class="tab-pane fade @(Model.status.ToLower() == "pending" || Model.status.ToLower() == "chờ xử lý") ? "show active" : "")" id="tab-pending-content" role="tabpanel" aria-labelledby="tab-pending">
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>Mã DH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders.Any())
+                        {
+                            @foreach (var order in Model.Orders)
+                            {
                                 <tr>
-                                    <th>#</th>
-                                    <th>Khách hàng</th>
-                                    <th>Ngày</th>
-                                    <th class="text-end">Tổng tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th></th>
+                                    <td>@($"#DH{order.Id:D4}")</td>
+                                    <td>@order.Customer.FullName</td>
+                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning text-dark",
+                                                OrderStatus.Shipping => "bg-info text-white",
+                                                OrderStatus.Completed => "bg-success text-white",
+                                                OrderStatus.Cancelled => "bg-danger text-white",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">
+                                            @order.StatusVietnamese
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var order in Model.Orders.Where(o => o.Status == status))
-                                {
-                                    <tr>
-                                        <td>#DH@order.Id.ToString("D4")</td>
-                                        <td>@order.Customer.FullName</td>
-                                        <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                        <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
-                                        <td>
-                                            @{
-                                                var badgeClass = order.Status switch
-                                                {
-                                                    OrderStatus.Pending => "bg-warning text-dark",
-                                                    OrderStatus.Shipping => "bg-info text-white",
-                                                    OrderStatus.Completed => "bg-success text-white",
-                                                    OrderStatus.Cancelled => "bg-danger text-white",
-                                                    _ => "bg-secondary"
-                                                };
-                                            }
-                                            <span class="badge @badgeClass">
-                                                @order.StatusVietnamese
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        }
+        </div>
+
+        <!-- Shipping tab -->
+        <div class="tab-pane fade @(Model.status.ToLower() == "shipping" || Model.status.ToLower() == "đang giao") ? "show active" : "")" id="tab-shipping-content" role="tabpanel" aria-labelledby="tab-shipping">
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>Mã DH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders.Any())
+                        {
+                            @foreach (var order in Model.Orders)
+                            {
+                                <tr>
+                                    <td>@($"#DH{order.Id:D4}")</td>
+                                    <td>@order.Customer.FullName</td>
+                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning text-dark",
+                                                OrderStatus.Shipping => "bg-info text-white",
+                                                OrderStatus.Completed => "bg-success text-white",
+                                                OrderStatus.Cancelled => "bg-danger text-white",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">
+                                            @order.StatusVietnamese
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Completed tab -->
+        <div class="tab-pane fade @(Model.status.ToLower() == "completed" || Model.status.ToLower() == "hoàn thành") ? "show active" : "")" id="tab-completed-content" role="tabpanel" aria-labelledby="tab-completed">
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>Mã DH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders.Any())
+                        {
+                            @foreach (var order in Model.Orders)
+                            {
+                                <tr>
+                                    <td>@($"#DH{order.Id:D4}")</td>
+                                    <td>@order.Customer.FullName</td>
+                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning text-dark",
+                                                OrderStatus.Shipping => "bg-info text-white",
+                                                OrderStatus.Completed => "bg-success text-white",
+                                                OrderStatus.Cancelled => "bg-danger text-white",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">
+                                            @order.StatusVietnamese
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cancelled tab -->
+        <div class="tab-pane fade @(Model.status.ToLower() == "cancelled" || Model.status.ToLower() == "đã hủy") ? "show active" : "")" id="tab-cancelled-content" role="tabpanel" aria-labelledby="tab-cancelled">
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>Mã DH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Orders.Any())
+                        {
+                            @foreach (var order in Model.Orders)
+                            {
+                                <tr>
+                                    <td>@($"#DH{order.Id:D4}")</td>
+                                    <td>@order.Customer.FullName</td>
+                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@(order.TotalAmount.ToString("N0", new CultureInfo("vi-VN"))) ₫</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                OrderStatus.Pending => "bg-warning text-dark",
+                                                OrderStatus.Shipping => "bg-info text-white",
+                                                OrderStatus.Completed => "bg-success text-white",
+                                                OrderStatus.Cancelled => "bg-danger text-white",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">
+                                            @order.StatusVietnamese
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="./Details" asp-route-id="@order.Id" class="text-sm text-muted">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center mt-4">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="@Model.status" asp-route-StartDate="@Model.StartDate" asp-route-EndDate="@Model.EndDate" asp-route-pageNumber="@(Model.PageNumber - 1)">« Trước</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">« Trước</span></li>
+            }
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="@Model.status" asp-route-StartDate="@Model.StartDate" asp-route-EndDate="@Model.EndDate" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm" asp-route-status="@Model.status" asp-route-StartDate="@Model.StartDate" asp-route-EndDate="@Model.EndDate" asp-route-pageNumber="@(Model.PageNumber + 1)">Sau »</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Sau »</span></li>
+            }
+        </ul>
+    </nav>
+}

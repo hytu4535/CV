@@ -44,6 +44,9 @@ namespace ShopUI.Data
                 .Property(o => o.TotalAmount)
                 .HasPrecision(18, 0);
             modelBuilder.Entity<Order>()
+                .Property(o => o.PaymentMethod)
+                .HasMaxLength(30);
+            modelBuilder.Entity<Order>()
                 .Property(o => o.OrderDate)
                 .HasDefaultValueSql("GETDATE()");
 

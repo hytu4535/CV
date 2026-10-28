@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using ShopUI.Models;
 using ShopUI.Data;
 
@@ -24,22 +25,20 @@ namespace ShopUI.Pages.Admin.Customers
         {
             public int Id { get; set; }
 
-            [Required]
-            [StringLength(100, MinimumLength = 2)]
-            [RegularExpression(@"^[a-zA-ZÀ-ỹ\s]{2,100}$", ErrorMessage = "Họ tên chỉ gồm chữ cái, 2-100 ký tự")]
+            [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
+            [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên phải từ 2 đến 100 ký tự.")]
             public string FullName { get; set; } = string.Empty;
 
-            [Required]
-            [StringLength(100)]
-            [RegularExpression(@"^[\w\.\-]+@[\w\-]+(\.[\w\-]+)+$", ErrorMessage = "Email không hợp lệ")]
+            [Required(ErrorMessage = "Vui lòng nhập email.")]
+            [StringLength(100, ErrorMessage = "Email không được vượt quá 100 ký tự.")]
+            [RegularExpression(@"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$", ErrorMessage = "Email không hợp lệ.")]
             public string Email { get; set; } = string.Empty;
 
-            [Required]
-            [StringLength(15)]
-            [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Số điện thoại VN không hợp lệ (VD: 0912345678)")]
+            [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+            [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Số điện thoại Việt Nam không hợp lệ (VD: 0912345678).")]
             public string Phone { get; set; } = string.Empty;
 
-            [StringLength(255)]
+            [StringLength(255, ErrorMessage = "Địa chỉ không được vượt quá 255 ký tự.")]
             public string? Address { get; set; }
         }
 
@@ -65,21 +64,31 @@ namespace ShopUI.Pages.Admin.Customers
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            customer.FullName = Input.FullName;
-            customer.Email = Input.Email;
-            customer.Phone = Input.Phone;
-            customer.Address = Input.Address;
+            var email = Input.Email.Trim();
+            var phone = Input.Phone.Trim();
+            if (await _context.Customers.AnyAsync(c => c.Id != id && c.Email.ToLower() == email.ToLower()))
+            {
+                ModelState.AddModelError("Input.Email", "Email này đã được sử dụng.");
+            }
+            if (await _context.Customers.AnyAsync(c => c.Id != id && c.Phone == phone))
+            {
+                ModelState.AddModelError("Input.Phone", "Số điện thoại này đã được sử dụng.");
+            }
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            customer.FullName = Input.FullName.Trim();
+            customer.Email = email;
+            customer.Phone = phone;
+            customer.Address = string.IsNullOrWhiteSpace(Input.Address) ? null : Input.Address.Trim();
 
             await _context.SaveChangesAsync();
 
